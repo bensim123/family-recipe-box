@@ -48,42 +48,42 @@ service cloud.firestore {
     // Every person has one private box with id "p_<uid>" (personal: true, never shared).
     // Shared family boxes: anyone with the invite link (box id + invite code) can join after signing in.
 
-    function signedIn() { return request.auth != null; }
-    function box(boxId) { return get(/databases/$(database)/documents/recipeBoxes/$(boxId)).data; }
-    function isMember(boxId) { return signedIn() && request.auth.uid in box(boxId).members; }
-    function isOwner(boxId) { return signedIn() && box(boxId).ownerUid == request.auth.uid; }
-    function isPersonalBox(data) { return data.get('personal', false) == true; }
+    function rbSignedIn() { return request.auth != null; }
+    function rbBox(boxId) { return get(/databases/$(database)/documents/recipeBoxes/$(boxId)).data; }
+    function rbIsMember(boxId) { return rbSignedIn() && request.auth.uid in rbBox(boxId).members; }
+    function rbIsOwner(boxId) { return rbSignedIn() && rbBox(boxId).ownerUid == request.auth.uid; }
+    function rbIsPersonal(data) { return data.get('personal', false) == true; }
 
     match /recipeBoxes/{boxId} {
       // A missing box can be "read" so the app can check whether your private box exists yet.
-      allow read: if signedIn() && (resource == null || request.auth.uid in resource.data.members);
+      allow read: if rbSignedIn() && (resource == null || request.auth.uid in resource.data.members);
 
-      allow create: if signedIn()
+      allow create: if rbSignedIn()
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.members == [request.auth.uid]
         && (
-          (isPersonalBox(request.resource.data) && boxId == 'p_' + request.auth.uid)
-          || (!isPersonalBox(request.resource.data)
+          (rbIsPersonal(request.resource.data) && boxId == 'p_' + request.auth.uid)
+          || (!rbIsPersonal(request.resource.data)
               && request.resource.data.inviteCode is string
               && request.resource.data.inviteCode.size() >= 16)
         );
 
       // The owner can rename the box, change the invite code, or remove people.
       // A private box always keeps exactly one member: its owner.
-      allow update: if signedIn() && resource.data.ownerUid == request.auth.uid
+      allow update: if rbSignedIn() && resource.data.ownerUid == request.auth.uid
         && request.resource.data.ownerUid == resource.data.ownerUid
         && request.auth.uid in request.resource.data.members
-        && isPersonalBox(request.resource.data) == isPersonalBox(resource.data)
-        && (!isPersonalBox(resource.data) || request.resource.data.members == [request.auth.uid]);
+        && rbIsPersonal(request.resource.data) == rbIsPersonal(resource.data)
+        && (!rbIsPersonal(resource.data) || request.resource.data.members == [request.auth.uid]);
 
       // A member can update their own display name.
-      allow update: if signedIn() && request.auth.uid in resource.data.members
+      allow update: if rbSignedIn() && request.auth.uid in resource.data.members
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberNames'])
         && request.resource.data.memberNames.diff(resource.data.memberNames).affectedKeys().hasOnly([request.auth.uid]);
 
       // Joining: add only yourself, and only with the right invite code.
-      allow update: if signedIn()
-        && !isPersonalBox(resource.data)
+      allow update: if rbSignedIn()
+        && !rbIsPersonal(resource.data)
         && !(request.auth.uid in resource.data.members)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'memberNames', 'joinCode'])
         && request.resource.data.joinCode == resource.data.inviteCode
@@ -93,35 +93,35 @@ service cloud.firestore {
         && request.resource.data.memberNames.diff(resource.data.memberNames).affectedKeys().hasOnly([request.auth.uid]);
 
       // Leaving: a member (not the owner) can remove only themselves.
-      allow update: if signedIn() && request.auth.uid in resource.data.members
+      allow update: if rbSignedIn() && request.auth.uid in resource.data.members
         && resource.data.ownerUid != request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'memberNames'])
         && !(request.auth.uid in request.resource.data.members)
         && resource.data.members.removeAll(request.resource.data.members).hasOnly([request.auth.uid]);
 
-      allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
+      allow delete: if rbSignedIn() && resource.data.ownerUid == request.auth.uid;
 
       match /recipes/{recipeId} {
-        allow read: if isMember(boxId);
-        allow create: if isMember(boxId) && request.resource.data.addedBy == request.auth.uid;
-        allow update: if isMember(boxId) && request.resource.data.addedBy == resource.data.addedBy;
-        allow delete: if isMember(boxId) && (resource.data.addedBy == request.auth.uid || isOwner(boxId));
+        allow read: if rbIsMember(boxId);
+        allow create: if rbIsMember(boxId) && request.resource.data.addedBy == request.auth.uid;
+        allow update: if rbIsMember(boxId) && request.resource.data.addedBy == resource.data.addedBy;
+        allow delete: if rbIsMember(boxId) && (resource.data.addedBy == request.auth.uid || rbIsOwner(boxId));
       }
 
       match /memories/{memoryId} {
-        allow read: if isMember(boxId);
-        allow create: if isMember(boxId) && request.resource.data.by == request.auth.uid;
+        allow read: if rbIsMember(boxId);
+        allow create: if rbIsMember(boxId) && request.resource.data.by == request.auth.uid;
         allow update: if false;
-        allow delete: if isMember(boxId) && (resource.data.by == request.auth.uid || isOwner(boxId));
+        allow delete: if rbIsMember(boxId) && (resource.data.by == request.auth.uid || rbIsOwner(boxId));
       }
 
       // Photos of the original cards, stored as compressed JPEG data URLs (< 1 MB each).
       match /photos/{photoId} {
-        allow read: if isMember(boxId);
-        allow create: if isMember(boxId) && request.resource.data.by == request.auth.uid
+        allow read: if rbIsMember(boxId);
+        allow create: if rbIsMember(boxId) && request.resource.data.by == request.auth.uid
           && request.resource.data.data is string && request.resource.data.data.size() < 1000000;
         allow update: if false;
-        allow delete: if isMember(boxId) && (resource.data.by == request.auth.uid || isOwner(boxId));
+        allow delete: if rbIsMember(boxId) && (resource.data.by == request.auth.uid || rbIsOwner(boxId));
       }
     }
   }

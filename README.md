@@ -54,7 +54,7 @@ Photos are stored in Firestore as compressed JPEGs, so Firebase Storage and the 
 
 ## Setup (one time)
 
-1. **Publish the database rules.** Firebase Console → project `bookshelf-9a848` → Firestore Database → Rules. Replace everything there with the contents of [`firestore.rules`](firestore.rules) and click **Publish**. The file contains the Bookshelf rules unchanged, with the recipe box rules added after them.
+1. **Add the database rules.** Firebase Console → project `bookshelf-9a848` → Firestore Database → Rules. Paste the contents of [`firestore.recipe-box-addon.rules`](firestore.recipe-box-addon.rules) just above the last two closing braces `}` `}` of the rules that are already there, then click **Publish**. This leaves the live Bookshelf rules untouched. ([`firestore.rules`](firestore.rules) shows the complete combined file, but its Bookshelf half is copied from Bookshelf's DEPLOY_README and may be older than what's live.)
 2. **Microsoft sign-in** works only if it is already turned on for Bookshelf. Nothing else changes in Firebase. `bensim123.github.io` is already an authorized domain, and the Cloudflare Worker already accepts requests from it.
 3. **Turn on GitHub Pages** for this repository: branch `main`, folder `/` (root).
 
