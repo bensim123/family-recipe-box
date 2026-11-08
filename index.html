@@ -137,7 +137,9 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
 .panel { background: var(--paper); border-radius: 8px; padding: 16px; margin-bottom: 18px; display: grid; gap: 12px; }
 .thumbs { display: flex; flex-wrap: wrap; gap: 10px; }
 .thumbs figure { margin: 0; position: relative; }
-.thumbs img { width: 96px; height: 96px; object-fit: cover; border-radius: 4px; display: block; }
+.thumbs img { width: 96px; height: 96px; object-fit: cover; border-radius: 4px; display: block; cursor: pointer; }
+.thumbs figcaption { position: absolute; left: 4px; bottom: 4px; font-size: .7rem; background: rgba(0,0,0,.65); color: #fff; padding: 1px 6px; border-radius: 3px; }
+.flabel { font-weight: 600; font-size: .9rem; }
 .thumbs button { position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); cursor: pointer; line-height: 1; }
 .form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
 .form .full { grid-column: 1 / -1; }
@@ -258,13 +260,8 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
     </div>
 
     <div class="panel" id="photoPanel">
-      <div class="field">
-        <label for="photoInput">Photos of the original</label>
-        <input id="photoInput" type="file" accept="image/*" multiple>
-        <small>Front and back of a card, or both pages of a spread. Up to 3 photos. Lay it flat in good light.</small>
-      </div>
-      <div class="thumbs" id="thumbs"></div>
-      <div><button class="btn" id="readBtn" type="button">Read it for me</button></div>
+      <p style="margin:0">Photograph a handwritten card or a cookbook page and the app types it up. Front and back of a card, or both pages of a spread. Lay it flat in good light.</p>
+      <div class="actions"><label class="btn primary" for="photoInput">Take or choose photos</label><button class="btn" id="readBtn" type="button">Read it for me</button></div>
     </div>
 
     <div class="panel" id="pastePanel" hidden>
@@ -291,6 +288,12 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
       <div class="field full"><label for="fIngredients">Ingredients</label><textarea id="fIngredients" placeholder="One per line&#10;2 c. flour&#10;1 stick oleo"></textarea></div>
       <div class="field full"><label for="fSteps">Directions</label><textarea id="fSteps" placeholder="One step per line"></textarea></div>
       <div class="field full"><label for="fNotes">Notes on the card, and the story behind it</label><textarea id="fNotes" placeholder="&quot;Double for Christmas.&quot; Grandma made this every Easter."></textarea></div>
+      <div class="field full"><span class="flabel">Photos</span>
+        <div class="thumbs" id="thumbs"></div>
+        <div><label class="btn ghost" for="photoInput">+ Add photos</label></div>
+        <small id="photoHint">The finished dish, the original card, anything worth keeping. Up to 6. The first photo shows on the recipe card; tap another to put it first.</small>
+        <input id="photoInput" type="file" accept="image/*" multiple hidden>
+      </div>
       <div class="field full"><label for="fTags">Tags</label>
         <input id="fTags" maxlength="400" placeholder="christmas, cookies, butter, make-ahead">
         <small>Separate tags with commas. The reader suggests some when it reads a recipe; add or remove any you like.</small>
@@ -340,9 +343,10 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
   };
   const AI_PROXY_URL = "https://calm-butterfly-1f95.bensim123.workers.dev/";
   const VISION_MODEL = "qwen/qwen3.8-27b";   // Groq vision model: max 3 images per request
-  const MAX_AI_IMAGES = 3;
+  const MAX_AI_IMAGES = 3;   // photos the reader looks at in one go
+  const MAX_PHOTOS = 6;      // photos kept per recipe
   const TEXT_MODEL   = "openai/gpt-oss-20b";
-  const APP_VERSION  = "1.1";
+  const APP_VERSION  = "1.2";
 
   firebase.initializeApp(FIREBASE_CONFIG);
   const auth = firebase.auth();
@@ -374,6 +378,8 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
     for (const c of kids.flat()) if (c != null && c !== false) n.append(c);
     return n;
   };
+  // replaceChildren() doesn't flatten lists or skip nulls; this does, like el().
+  const fill = (node, ...kids) => node.replaceChildren(...kids.flat(Infinity).filter((c) => c != null && c !== false));
   const str = (v, max = 6000) => (typeof v === "string" ? v : v == null ? "" : String(v)).slice(0, max);
   const list = (v) => Array.isArray(v) ? v.map((x) => str(x, 1000).trim()).filter(Boolean).slice(0, 200) : [];
   const safeImg = (u) => typeof u === "string" && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(u) ? u : null;
@@ -399,7 +405,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
   let recipes = [], memories = [];
   let unsub = [];
   let filterSrc = "all", openId = null, editingId = null;
-  let pendingPhotos = [], keptPhotoIds = [];
+  let editPhotos = [];   // in order: {pid} for saved photos, {data, thumb} for new ones
   const photoCache = new Map();
   let wakeLock = null;
 
@@ -688,6 +694,11 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
     const hay = [r.title, r.sourceDetail, r.category, r.notes, ...r.tags, ...r.ingredients].join(" ").toLowerCase();
     return q.split(/\s+/).every((w) => hay.includes(w));
   }
+  function lazyPhoto(pid) {
+    const img = el("img", { class: "ph", alt: "" });
+    getPhoto(pid).then((src) => { if (src) img.src = src; else img.remove(); });
+    return img;
+  }
   function renderGrid() {
     $("#boxLoading").hidden = true;
     const has = recipes.length > 0;
@@ -699,7 +710,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
     const grid = $("#grid"); grid.hidden = !shown.length; grid.replaceChildren();
     for (const r of shown) {
       grid.append(el("button", { class: "rcard", type: "button", onclick: () => openRecipe(r.id) },
-        r.thumb ? el("img", { class: "ph", src: r.thumb, alt: "", loading: "lazy" }) : null,
+        r.thumb ? el("img", { class: "ph", src: r.thumb, alt: "", loading: "lazy" }) : r.photoIds.length ? lazyPhoto(r.photoIds[0]) : null,
         el("div", { class: "body" },
           el("span", { class: "tag", text: SRC[r.source] || "Recipe" }),
           el("h3", { text: r.title || "Untitled recipe" }),
@@ -763,7 +774,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
           slot.replaceWith(src ? el("img", { src, alt: `Original recipe, photo ${i + 1}`, onclick: () => lightbox(src) }) : el("div", { class: "cap", text: "This photo couldn't be loaded." }));
         });
       });
-      originals.append(el("div", { class: "cap", text: "The original. Tap a photo to see it full size." }));
+      originals.append(el("div", { class: "cap", text: "Tap a photo to see it full size." }));
     }
 
     const memInput = el("input", { id: "memText", placeholder: "Who made it, when, what it reminds you of…", maxlength: "1000", "aria-label": "Add a memory" });
@@ -776,7 +787,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
 
     const actions = el("div", { class: "actions" });
     const drawActions = () => {
-      actions.replaceChildren(
+      fill(actions,
         el("button", { class: "btn", type: "button", text: "Edit", onclick: () => { closeRecipe(); openEditor(r); } }),
         "wakeLock" in navigator ? el("button", { class: "btn", type: "button", text: wakeLock ? "Screen stays on ✓" : "Keep screen on while cooking", onclick: toggleWake }) : null,
         others.length ? el("button", { class: "btn", type: "button", text: isPersonal(box) ? "Copy to a family box…" : "Copy to…", onclick: drawCopy }) : null,
@@ -825,7 +836,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
       drawActions();
     }
 
-    sheet.replaceChildren(
+    fill(sheet,
       el("button", { class: "close", type: "button", "aria-label": "Close", text: "×", onclick: closeRecipe }),
       el("div", { class: "detail" + (originals ? "" : " nophoto") },
         originals,
@@ -890,10 +901,10 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
   function openEditor(r) {
     editingId = r ? r.id : null;
     $("#eTitle").textContent = r ? "Edit recipe" : "Add a recipe";
-    pendingPhotos = []; keptPhotoIds = r ? [...r.photoIds] : [];
+    editPhotos = r ? r.photoIds.map((pid) => ({ pid })) : [];
     $("#photoInput").value = ""; $("#pasteText").value = ""; $("#pasteUrl").value = "";
     fillForm(r || { source: "grandma" });
-    setMode(r ? "photo" : "photo");
+    setMode(r ? "type" : "photo");
     drawThumbs();
     $("#saveStatus").textContent = "";
     editDlg.showModal();
@@ -923,13 +934,13 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
 
   function drawThumbs() {
     const t = $("#thumbs"); t.replaceChildren();
-    keptPhotoIds.forEach((pid, i) => {
-      const img = el("img", { alt: "Saved photo" });
-      getPhoto(pid).then((src) => { if (src) img.src = src; });
-      t.append(el("figure", {}, img, el("button", { type: "button", "aria-label": "Remove photo", text: "×", onclick: () => { keptPhotoIds.splice(i, 1); drawThumbs(); } })));
+    editPhotos.forEach((p, i) => {
+      const img = el("img", { alt: i ? `Photo ${i + 1}. Tap to show it first` : "Cover photo", title: i ? "Show this one first" : "",
+        onclick: () => { if (i) { editPhotos.unshift(...editPhotos.splice(i, 1)); drawThumbs(); } } });
+      if (p.data) img.src = p.data; else getPhoto(p.pid).then((src) => { if (src) img.src = src; });
+      t.append(el("figure", {}, img, i === 0 ? el("figcaption", { text: "Cover" }) : null,
+        el("button", { type: "button", "aria-label": "Remove photo", text: "×", onclick: () => { editPhotos.splice(i, 1); drawThumbs(); } })));
     });
-    pendingPhotos.forEach((p, i) => t.append(el("figure", {}, el("img", { src: p.data, alt: "New photo" }),
-      el("button", { type: "button", "aria-label": "Remove photo", text: "×", onclick: () => { pendingPhotos.splice(i, 1); drawThumbs(); } }))));
   }
 
   // Shrink phone photos to a JPEG data URL under a size limit (Firestore docs max out at 1 MB).
@@ -938,7 +949,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
     try { bmp = await createImageBitmap(file, { imageOrientation: "from-image" }); }
     catch { bmp = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); }); }
     const w0 = bmp.width, h0 = bmp.height;
-    for (let dim = maxDim; dim >= 600; dim = Math.round(dim * 0.8)) {
+    for (let dim = maxDim; dim >= Math.min(600, maxDim) * 0.5; dim = Math.round(dim * 0.8)) {
       const s = Math.min(1, dim / Math.max(w0, h0));
       const c = document.createElement("canvas");
       c.width = Math.round(w0 * s); c.height = Math.round(h0 * s);
@@ -950,21 +961,27 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
     }
     throw new Error("too-big");
   }
+  async function thumbFromPhoto(pid) {
+    try { const src = await getPhoto(pid); return src ? await toJpeg(await (await fetch(src)).blob(), 480, 60000) : null; } catch { return null; }
+  }
   $("#photoInput").addEventListener("change", async (e) => {
-    const room = Math.max(0, MAX_AI_IMAGES - pendingPhotos.length - keptPhotoIds.length);
+    const room = Math.max(0, MAX_PHOTOS - editPhotos.length);
     const files = [...e.target.files].slice(0, room);
     e.target.value = "";
-    if (!files.length) { setAi("That's the limit of 3 photos.", "err"); return; }
+    if (!files.length) { setAi(`That's the limit of ${MAX_PHOTOS} photos.`, "err"); return; }
+    const scanning = !$("#photoPanel").hidden && !editingId && !$("#fIngredients").value.trim();
     setAi("Preparing photos…");
+    let added = 0;
     for (const f of files) {
       try {
         const data = await toJpeg(f, 1800, 850000);
         const thumb = await toJpeg(f, 480, 60000);
-        pendingPhotos.push({ data, thumb });
+        editPhotos.push({ data, thumb }); added++;
       } catch { setAi("One photo couldn't be read. Try taking it again.", "err"); }
     }
     drawThumbs();
-    if (pendingPhotos.length) readPhotos();
+    if (added && scanning) readPhotos();
+    else if (added) setAi(added === 1 ? "Photo added. It's saved when you save the recipe." : "Photos added. They're saved when you save the recipe.", "ok");
   });
 
   // ─── AI (Groq through the Bookshelf Cloudflare Worker) ─────────────────────
@@ -1005,8 +1022,8 @@ ${META}`;
 
   $("#readBtn").addEventListener("click", () => readPhotos());
   async function readPhotos() {
-    const imgs = pendingPhotos.map((p) => p.data).slice(0, MAX_AI_IMAGES);
-    if (!imgs.length) { setAi(keptPhotoIds.length ? "Add a new photo to read. Saved photos are already typed up." : "Add a photo first.", "err"); return; }
+    const imgs = editPhotos.filter((p) => p.data).map((p) => p.data).slice(0, MAX_AI_IMAGES);
+    if (!imgs.length) { setAi(editPhotos.length ? "Add a new photo to read. Saved photos are already typed up." : "Add a photo first.", "err"); return; }
     const btn = $("#readBtn"); btn.disabled = true; setAi("Reading the card… this takes about 20 seconds.");
     try {
       const v = await askAI(VISION_MODEL, [
@@ -1075,15 +1092,20 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
     const btn = $("#saveBtn"); btn.disabled = true; st.className = "status"; st.textContent = "Saving…";
     try {
       const ref = boxRef();
-      const photoIds = [...keptPhotoIds];
-      for (const p of pendingPhotos) {
+      const photoIds = [];
+      for (const p of editPhotos) {
+        if (p.pid) { photoIds.push(p.pid); continue; }
         const pr = await ref.collection("photos").add({ data: p.data, by: me.uid, createdAt: FV.serverTimestamp() });
         photoCache.set(pr.id, Promise.resolve(p.data));
-        photoIds.push(pr.id);
+        p.pid = pr.id; photoIds.push(pr.id);
       }
       const old = editingId ? recipes.find((x) => x.id === editingId) : null;
-      let thumb = pendingPhotos[0] && pendingPhotos[0].thumb;
-      if (!thumb && old && old.thumb && photoIds.includes(old.photoIds[0])) thumb = old.thumb;
+      // The card picture is a small copy of the first photo.
+      const first = editPhotos[0];
+      let thumb = null;
+      if (first && first.thumb) thumb = first.thumb;
+      else if (first && old && old.thumb && old.photoIds[0] === first.pid) thumb = old.thumb;
+      else if (first) thumb = await thumbFromPhoto(first.pid);
       const lines = (s) => s.split("\n").map((x) => x.trim()).filter(Boolean);
       const data = {
         title, source: $("#fSource").value, sourceDetail: $("#fSourceDetail").value.trim(), category: $("#fCategory").value,
@@ -1100,7 +1122,7 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
         const nr = await ref.collection("recipes").add({ ...data, addedBy: me.uid, addedByName: myName(), createdAt: FV.serverTimestamp() });
         id = nr.id;
       }
-      pendingPhotos = [];
+      editPhotos = [];
       editDlg.close();
       toast("Saved to the box");
       if (id) setTimeout(() => openRecipe(id), 400);
@@ -1127,7 +1149,7 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
     const sheet = $("#familySheet");
     const personal = isPersonal(box);
     const inviteInput = el("input", { id: "inviteLink", readonly: true, value: owner || box.inviteCode ? inviteUrl : "", onfocus: (e) => e.target.select(), "aria-label": "Invite link" });
-    sheet.replaceChildren(
+    fill(sheet,
       el("button", { class: "close", type: "button", "aria-label": "Close", text: "×", onclick: () => familyDlg.close() }),
       el("h2", { id: "fTitleH", text: personal ? "Settings" : "Family & settings" }),
       personal ? [
@@ -1139,7 +1161,7 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
         el("p", { style: "margin:0 0 8px", text: "Text or email this link. They sign in with Google, Microsoft or an email address, and they're in." }),
         el("div", { class: "copyrow" }, inviteInput, el("button", { class: "btn primary", type: "button", text: "Copy link", onclick: () => copyText(inviteUrl, "Invite link copied") })),
       ] : el("p", { text: "Ask the box's owner for an invite link." }),
-      owner ? el("p", { style: "font-size:.88rem;color:var(--muted)" }, "Link shared somewhere it shouldn't be? ",
+      owner && !personal ? el("p", { style: "font-size:.88rem;color:var(--muted)" }, "Link shared somewhere it shouldn't be? ",
         el("button", { class: "linkbtn", type: "button", text: "Make a new link", onclick: async () => {
           try { await boxRef().update({ inviteCode: randCode() }); toast("New link made. The old one no longer works."); } catch { toast("Couldn't change the link."); }
         } }), " (people already in the box stay in).") : null,
@@ -1193,7 +1215,7 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
       say(`Importing ${added + skipped + 1} of ${list0.length}: ${title}`);
       try {
         const photoIds = []; let thumb = safeImg(r.thumb);
-        for (const pid of Array.isArray(r.photoIds) ? r.photoIds.slice(0, MAX_AI_IMAGES) : []) {
+        for (const pid of Array.isArray(r.photoIds) ? r.photoIds.slice(0, MAX_PHOTOS) : []) {
           const d = safeImg(photos[pid]);
           if (d && d.length < 950000) photoIds.push((await ref.collection("photos").add({ data: d, by: me.uid, createdAt: FV.serverTimestamp() })).id);
         }

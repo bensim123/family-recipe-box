@@ -11,6 +11,7 @@ Grandma's cards, Mom's cookbook, and everything we've saved since, in one place 
 - **Details filled in for you.** When it reads a recipe, the app also picks a category, suggests tags (main ingredient, course, cuisine, holiday, cooking method, diet), and estimates servings and time if the card doesn't say. Anyone can change these or add their own tags. A typed-in recipe can get the same suggestions with one button.
 - **Paste from Facebook, Pinterest or a website.** The app pulls out just the recipe and leaves out the life story and ads.
 - **Type it in** by hand.
+- **Photos on any recipe**: the finished dish, the original card, up to 6. The first one is the picture on the recipe card, and you can pick which one goes first.
 - **Family memories** on every recipe ("Grandma made this every Easter"). In family boxes, every recipe shows who added it.
 - Search by name, ingredient, tag or note. Filter by where a recipe came from or by category. Tap a tag to see every recipe with it.
 - Keep the screen on while cooking, and tick off ingredients as you go.
@@ -61,7 +62,7 @@ Photos are stored in Firestore as compressed JPEGs, so Firebase Storage and the 
 ## Limits
 
 - The Cloudflare Worker allows one AI request per person every 30 seconds, shared with Bookshelf.
-- The photo reader handles up to 3 photos per recipe.
+- A recipe holds up to 6 photos. The reader looks at up to 3 new photos at a time.
 - Handwriting reading is good but not perfect. Always read the result over before saving.
 
 ## Running locally
