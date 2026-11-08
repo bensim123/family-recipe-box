@@ -6,18 +6,20 @@ Grandma's cards, Mom's cookbook, and everything we've saved since, in one place 
 
 ## What it does
 
-- **Photograph a paper recipe.** Take a photo of a handwritten card or a cookbook page. The app reads the handwriting and fills in the recipe for you to check. It keeps the cook's own wording ("1 stick oleo") and marks unclear words with `[?]`. The photo of the original is saved next to the typed version.
+- **Your own box, plus family boxes.** Everyone gets a private "My recipes" box. Family boxes are shared, and you can be in several. Any recipe can be copied from one box to another, photos included.
+- **Photograph a paper recipe.** Take a photo of a handwritten card or a cookbook page and the app reads it straight away. It keeps the cook's own wording ("1 stick oleo") and marks unclear words with `[?]`. The photo of the original is saved next to the typed version.
+- **Details filled in for you.** When it reads a recipe, the app also picks a category, suggests tags (main ingredient, course, cuisine, holiday, cooking method, diet), and estimates servings and time if the card doesn't say. Anyone can change these or add their own tags. A typed-in recipe can get the same suggestions with one button.
 - **Paste from Facebook, Pinterest or a website.** The app pulls out just the recipe and leaves out the life story and ads.
 - **Type it in** by hand.
-- **Family memories** on every recipe ("Grandma made this every Easter").
-- Search by name, ingredient or note. Filter by where a recipe came from or by category.
+- **Family memories** on every recipe ("Grandma made this every Easter"). In family boxes, every recipe shows who added it.
+- Search by name, ingredient, tag or note. Filter by where a recipe came from or by category. Tap a tag to see every recipe with it.
 - Keep the screen on while cooking, and tick off ingredients as you go.
-- Download a backup of every recipe, memory and photo as a JSON file.
+- Download a backup of a box (recipes, memories and photos) as a JSON file, and import one into any box.
 - Add it to an iPhone home screen from Safari (Share → Add to Home Screen).
 
 ## How the family joins
 
-1. The owner creates the box after signing in.
+1. Someone starts a family box with **+ Family box**.
 2. **Family & settings → Copy link** gives an invite link.
 3. Family members open the link and sign in with Google, Microsoft or an email address. They're in.
 
@@ -38,10 +40,12 @@ Built the same way as [Bookshelf](https://github.com/bensim123/bookshelf-app):
 ### Firestore layout
 
 ```
-recipeBoxes/{boxId}                 name, ownerUid, members[], memberNames{uid: name}, inviteCode
+recipeBoxes/{boxId}                 name, ownerUid, members[], memberNames{uid: name}, personal, inviteCode
+                                    (each person's private box has id p_<uid> and personal: true)
 recipeBoxes/{boxId}/recipes/{id}    title, source, sourceDetail, category, url, servings, time,
-                                    ingredients[], steps[], notes, photoIds[], thumb (small JPEG data URL),
-                                    addedBy, addedByName, createdAt, updatedAt, updatedBy
+                                    ingredients[], steps[], notes, tags[], photoIds[], thumb (small JPEG data URL),
+                                    addedBy, addedByName, createdAt, updatedAt, updatedBy,
+                                    copiedFrom{boxId, recipeId, boxName, addedByName}, importedFrom
 recipeBoxes/{boxId}/memories/{id}   recipeId, text, by, byName, createdAt
 recipeBoxes/{boxId}/photos/{id}     data (JPEG data URL, under 850 KB), by, createdAt
 ```
