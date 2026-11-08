@@ -1,0 +1,69 @@
+# The Family Recipe Box
+
+Grandma's cards, Mom's cookbook, and everything we've saved since, in one place the whole family can add to.
+
+**Live:** https://bensim123.github.io/family-recipe-box
+
+## What it does
+
+- **Photograph a paper recipe.** Take a photo of a handwritten card or a cookbook page. The app reads the handwriting and fills in the recipe for you to check. It keeps the cook's own wording ("1 stick oleo") and marks unclear words with `[?]`. The photo of the original is saved next to the typed version.
+- **Paste from Facebook, Pinterest or a website.** The app pulls out just the recipe and leaves out the life story and ads.
+- **Type it in** by hand.
+- **Family memories** on every recipe ("Grandma made this every Easter").
+- Search by name, ingredient or note. Filter by where a recipe came from or by category.
+- Keep the screen on while cooking, and tick off ingredients as you go.
+- Download a backup of every recipe, memory and photo as a JSON file.
+- Add it to an iPhone home screen from Safari (Share → Add to Home Screen).
+
+## How the family joins
+
+1. The owner creates the box after signing in.
+2. **Family & settings → Copy link** gives an invite link.
+3. Family members open the link and sign in with Google, Microsoft or an email address. They're in.
+
+The owner can make a new link, which stops the old one from working, and can remove people.
+
+## Tech
+
+Built the same way as [Bookshelf](https://github.com/bensim123/bookshelf-app):
+
+| Layer | Choice |
+|---|---|
+| App | A single `index.html`, plain JavaScript, no build step |
+| Hosting | GitHub Pages |
+| Sign-in | Firebase Authentication (Google, Microsoft, email and password). Same Firebase project as Bookshelf (`bookshelf-9a848`), so the same accounts work. |
+| Data | Cloud Firestore |
+| AI | Groq through the Bookshelf Cloudflare Worker (`calm-butterfly-1f95`). `qwen/qwen3.8-27b` reads photos and `openai/gpt-oss-20b` reads pasted text. |
+
+### Firestore layout
+
+```
+recipeBoxes/{boxId}                 name, ownerUid, members[], memberNames{uid: name}, inviteCode
+recipeBoxes/{boxId}/recipes/{id}    title, source, sourceDetail, category, url, servings, time,
+                                    ingredients[], steps[], notes, photoIds[], thumb (small JPEG data URL),
+                                    addedBy, addedByName, createdAt, updatedAt, updatedBy
+recipeBoxes/{boxId}/memories/{id}   recipeId, text, by, byName, createdAt
+recipeBoxes/{boxId}/photos/{id}     data (JPEG data URL, under 850 KB), by, createdAt
+```
+
+Photos are stored in Firestore as compressed JPEGs, so Firebase Storage and the paid Blaze plan aren't needed.
+
+## Setup (one time)
+
+1. **Publish the database rules.** Firebase Console → project `bookshelf-9a848` → Firestore Database → Rules. Replace everything there with the contents of [`firestore.rules`](firestore.rules) and click **Publish**. The file contains the Bookshelf rules unchanged, with the recipe box rules added after them.
+2. **Microsoft sign-in** works only if it is already turned on for Bookshelf. Nothing else changes in Firebase. `bensim123.github.io` is already an authorized domain, and the Cloudflare Worker already accepts requests from it.
+3. **Turn on GitHub Pages** for this repository: branch `main`, folder `/` (root).
+
+## Limits
+
+- The Cloudflare Worker allows one AI request per person every 30 seconds, shared with Bookshelf.
+- The photo reader handles up to 3 photos per recipe.
+- Handwriting reading is good but not perfect. Always read the result over before saving.
+
+## Running locally
+
+Serve the folder on port 3000. The worker and Firebase both accept `localhost:3000`.
+
+```bash
+npx serve -l 3000 .
+```
