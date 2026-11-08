@@ -71,3 +71,11 @@ Serve the folder on port 3000. The worker and Firebase both accept `localhost:30
 ```bash
 npx serve -l 3000 .
 ```
+
+## Testing the database rules
+
+`tests/rules.test.js` checks `firestore.rules` against the local Firestore emulator, acting as the box owner, a family member and an outsider. It never touches the live database. It needs Java 21 (`JAVA_HOME` set) and Node.
+
+```bash
+cd tests && npm install && npm test
+```

@@ -23,8 +23,12 @@ service cloud.firestore {
 
     match /emailToUid/{emailKey} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null
+      allow create, update: if request.auth != null
                    && request.resource.data.uid == request.auth.uid;
+      // Fix: a delete has no request.resource, so "allow write" above refused it
+      // and Bookshelf's "Delete my account" failed. Allow deleting your own entry.
+      allow delete: if request.auth != null
+                    && resource.data.uid == request.auth.uid;
     }
 
     match /friendRequests/{requestId} {
