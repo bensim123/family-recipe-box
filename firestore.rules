@@ -127,6 +127,33 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if rbIsMember(boxId) && (resource.data.by == request.auth.uid || rbIsOwner(boxId));
       }
+
+      // Activity feed for notifications: someone joined, added recipes, or shared a memory.
+      // Written by the person who did it, as themselves, stamped with the server's time.
+      match /activity/{activityId} {
+        allow read: if rbIsMember(boxId);
+        allow create: if rbIsMember(boxId)
+          && request.resource.data.by == request.auth.uid
+          && request.resource.data.type in ['join', 'recipe', 'memory']
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.keys().hasOnly(['type', 'by', 'byName', 'createdAt', 'recipeIds', 'titles', 'count', 'recipeId', 'title', 'text', 'recipeBy']);
+        allow update: if false;
+        allow delete: if rbIsMember(boxId) && (resource.data.by == request.auth.uid || rbIsOwner(boxId));
+      }
+
+      // Who's here now: one small record per person, refreshed while the app is open.
+      match /presence/{uid} {
+        allow read: if rbIsMember(boxId);
+        allow create, update: if rbIsMember(boxId) && uid == request.auth.uid
+          && request.resource.data.keys().hasOnly(['name', 'at', 'here'])
+          && request.resource.data.at == request.time;
+        allow delete: if rbSignedIn() && (uid == request.auth.uid || rbIsOwner(boxId));
+      }
+    }
+
+    // Each person's own Recipe Box settings (notifications, theme). Nobody else can read them.
+    match /recipeUsers/{uid} {
+      allow read, write: if rbSignedIn() && request.auth.uid == uid;
     }
   }
 }

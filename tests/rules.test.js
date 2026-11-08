@@ -169,6 +169,46 @@ describe("copying between boxes", () => {
   });
 });
 
+describe("notifications feed", () => {
+  const act = (uid, extra = {}) => ({ type: "recipe", by: uid, byName: "x", createdAt: serverTimestamp(), recipeIds: ["r_bob"], titles: ["Punch"], count: 1, ...extra });
+  test("members post activity as themselves, with the server's time", async () => {
+    await assertSucceeds(addDoc(collection(db(BOB), "recipeBoxes/fam/activity"), act(BOB)));
+    await assertFails(addDoc(collection(db(BOB), "recipeBoxes/fam/activity"), act(ALICE)));
+    await assertFails(addDoc(collection(db(BOB), "recipeBoxes/fam/activity"), act(BOB, { createdAt: new Date(2000, 0, 1) })));
+    await assertFails(addDoc(collection(db(BOB), "recipeBoxes/fam/activity"), act(BOB, { type: "admin" })));
+    await assertFails(addDoc(collection(db(BOB), "recipeBoxes/fam/activity"), act(BOB, { extra: 1 })));
+  });
+  test("someone who just joined can tell the owner", async () => {
+    await assertSucceeds(updateDoc(doc(db(CAROL), "recipeBoxes/fam"), { members: arrayUnion(CAROL), "memberNames.carol": "Carol", joinCode: CODE }));
+    await assertSucceeds(addDoc(collection(db(CAROL), "recipeBoxes/fam/activity"), { type: "join", by: CAROL, byName: "Carol", createdAt: serverTimestamp() }));
+    await assertSucceeds(getDocs(collection(db(ALICE), "recipeBoxes/fam/activity")));
+  });
+  test("outsiders can't read or post", async () => {
+    await assertFails(getDocs(collection(db(CAROL), "recipeBoxes/fam/activity")));
+    await assertFails(addDoc(collection(db(CAROL), "recipeBoxes/fam/activity"), act(CAROL)));
+  });
+});
+
+describe("who's here now", () => {
+  test("members set only their own presence; other members can see it", async () => {
+    await assertSucceeds(setDoc(doc(db(BOB), "recipeBoxes/fam/presence/bob"), { name: "Bob", at: serverTimestamp(), here: true }));
+    await assertFails(setDoc(doc(db(BOB), "recipeBoxes/fam/presence/alice"), { name: "Alice", at: serverTimestamp(), here: true }));
+    await assertFails(setDoc(doc(db(BOB), "recipeBoxes/fam/presence/bob"), { name: "Bob", at: new Date(2000, 0, 1), here: true }));
+    await assertSucceeds(getDoc(doc(db(ALICE), "recipeBoxes/fam/presence/bob")));
+    await assertFails(getDoc(doc(db(CAROL), "recipeBoxes/fam/presence/bob")));
+    await assertSucceeds(deleteDoc(doc(db(BOB), "recipeBoxes/fam/presence/bob")));
+  });
+});
+
+describe("personal settings", () => {
+  test("only you can read or change your settings", async () => {
+    await assertSucceeds(setDoc(doc(db(BOB), "recipeUsers/bob"), { theme: { mode: "dark" } }));
+    await assertSucceeds(getDoc(doc(db(BOB), "recipeUsers/bob")));
+    await assertFails(getDoc(doc(db(ALICE), "recipeUsers/bob")));
+    await assertFails(setDoc(doc(db(ALICE), "recipeUsers/bob"), { theme: {} }));
+  });
+});
+
 describe("Bookshelf rules alongside", () => {
   test("Bookshelf users still reach their own library and nobody else's", async () => {
     await assertSucceeds(setDoc(doc(db(ALICE), "users/alice"), { goal: 12 }));

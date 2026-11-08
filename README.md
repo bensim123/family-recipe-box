@@ -15,6 +15,11 @@ Grandma's cards, Mom's cookbook, and everything we've saved since, in one place 
 - **Family memories** on every recipe ("Grandma made this every Easter"). In family boxes, every recipe shows who added it.
 - Search by name, ingredient, tag or note. Filter by where a recipe came from or by category. Tap a tag to see every recipe with it.
 - Keep the screen on while cooking, and tick off ingredients as you go.
+- **Notifications.** The bell at the top lists what's new in your family boxes: someone joined a box you own, new recipes, and memories shared on recipes you added. In **Your settings**, choose for each one: off, in the app, or in the app plus an alert on this device. You can also mute a box.
+- **Who's here now.** Family boxes show who has the app open right now, and the member list shows when each person was last active. Anyone can turn this off for themselves.
+- **Your own look.** Light, dark, high contrast, or match the device; six colors; three text sizes; reduce motion. It follows your account to other devices, and **Reset to the default look** puts it back.
+- **Check for updates** in Your settings, like Bookshelf. The app also checks quietly and offers **Update now** when a new version is live.
+- Built to WCAG 2.1 AA: checked with axe in every theme and color, keyboard-friendly, with a skip link and screen-reader labels.
 - Download a backup of a box (recipes, memories and photos) as a JSON file, and import one into any box.
 - Add it to an iPhone home screen from Safari (Share → Add to Home Screen).
 
@@ -49,18 +54,23 @@ recipeBoxes/{boxId}/recipes/{id}    title, source, sourceDetail, category, url, 
                                     copiedFrom{boxId, recipeId, boxName, addedByName}, importedFrom
 recipeBoxes/{boxId}/memories/{id}   recipeId, text, by, byName, createdAt
 recipeBoxes/{boxId}/photos/{id}     data (JPEG data URL, under 850 KB), by, createdAt
+recipeBoxes/{boxId}/activity/{id}   type (join | recipe | memory), by, byName, createdAt, and recipeIds/titles/count
+                                    or recipeId/title/text/recipeBy
+recipeBoxes/{boxId}/presence/{uid}  name, at, here
+recipeUsers/{uid}                   theme{mode, accent, text, motion}, notify{join, recipe, memory}, muted[], showActive, seenAt
 ```
 
 Photos are stored in Firestore as compressed JPEGs, so Firebase Storage and the paid Blaze plan aren't needed.
 
 ## Setup (one time)
 
-1. **Add the database rules.** Firebase Console → project `bookshelf-9a848` → Firestore Database → Rules. Paste the contents of [`firestore.recipe-box-addon.rules`](firestore.recipe-box-addon.rules) just above the last two closing braces `}` `}` of the rules that are already there, then click **Publish**. This leaves the live Bookshelf rules untouched. ([`firestore.rules`](firestore.rules) shows the complete combined file, but its Bookshelf half is copied from Bookshelf's DEPLOY_README and may be older than what's live.)
+1. **Add the database rules.** Firebase Console → project `bookshelf-9a848` → Firestore Database → Rules. Paste the contents of [`firestore.recipe-box-addon.rules`](firestore.recipe-box-addon.rules) just above the last two closing braces `}` `}` of the rules that are already there, then click **Publish**. This leaves the live Bookshelf rules untouched. **When the add-on changes** (version 1.4 added notifications, presence and personal settings), delete the old block, from its `FAMILY RECIPE BOX: ADD-ON` line down to just above the last two closing braces, and paste the new one in its place. ([`firestore.rules`](firestore.rules) shows the complete combined file, but its Bookshelf half is copied from Bookshelf's DEPLOY_README and may be older than what's live.)
 2. **Microsoft sign-in** works only if it is already turned on for Bookshelf. Nothing else changes in Firebase. `bensim123.github.io` is already an authorized domain, and the Cloudflare Worker already accepts requests from it.
 3. **Turn on GitHub Pages** for this repository: branch `main`, folder `/` (root).
 
 ## Limits
 
+- Alerts on your device only work while the app is open, including in a background tab or app. Alerts when the app is fully closed (push notifications or email) need a server, which this setup doesn't have yet. On iPhone, alerts need the app added to the Home Screen.
 - The Cloudflare Worker allows one AI request per person every 30 seconds, shared with Bookshelf.
 - A recipe holds up to 6 photos. The reader looks at up to 3 new photos at a time.
 - Handwriting reading is good but not perfect. Always read the result over before saving.

@@ -17,6 +17,18 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// Apply the saved look before the page draws, so it doesn't flash.
+(function () {
+  try {
+    var t = JSON.parse(localStorage.getItem("rb_theme") || "{}"), d = document.documentElement;
+    if (t.mode && t.mode !== "system") d.dataset.mode = t.mode;
+    if (t.accent && t.accent !== "red") d.dataset.accent = t.accent;
+    if (t.text && t.text !== "normal") d.dataset.text = t.text;
+    if (t.motion === "reduce") d.dataset.motion = "reduce";
+  } catch (e) {}
+})();
+</script>
 <style>
 /* Layout: a wall of index cards (ruled blue lines, red header rule) under a quiet search bar; a recipe opens as one big card beside a photo of the original. */
 :root {
@@ -26,8 +38,12 @@
   --muted: #5A6577;
   --rule: #D3DFEE;
   --line: #DCE2EA;
-  --red: #BD3A3A;
-  --red-soft: #F7E3E1;
+  /* Accent color: each theme color has a light-mode, dark-mode and high-contrast value. */
+  --accent-l: #B33636; --accent-d: #E8807A; --accent-c: #8A1F1F;
+  --soft-l: #F7E3E1;   --soft-d: #3A2224;
+  --red: var(--accent-l);
+  --red-soft: var(--soft-l);
+  --on-red: #FFFFFF;
   --green: #3F7356;
   --shadow: 0 1px 2px rgba(29,40,56,.08), 0 6px 18px rgba(29,40,56,.07);
   --display: "Young Serif", Georgia, "Times New Roman", serif;
@@ -35,13 +51,31 @@
   --hand: "Nanum Pen Script", "Bradley Hand", "Segoe Print", cursive;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) { :root {
+@media (prefers-color-scheme: dark) { :root:not([data-mode="light"]):not([data-mode="contrast"]) {
   --paper: #11151C; --card: #1A2029; --ink: #E7EBF1; --muted: #9DA8B8; --rule: #263347; --line: #2B3441;
-  --red: #E2716B; --red-soft: #3A2224; --green: #7CC39A; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3); color-scheme: dark } }
+  --red: var(--accent-d); --red-soft: var(--soft-d); --on-red: #10141A; --green: #7CC39A; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3); color-scheme: dark } }
+:root[data-mode="dark"] {
+  --paper: #11151C; --card: #1A2029; --ink: #E7EBF1; --muted: #9DA8B8; --rule: #263347; --line: #2B3441;
+  --red: var(--accent-d); --red-soft: var(--soft-d); --on-red: #10141A; --green: #7CC39A; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3); color-scheme: dark }
+:root[data-mode="contrast"] {
+  --paper: #FFFFFF; --card: #FFFFFF; --ink: #000000; --muted: #262626; --rule: #8C8C8C; --line: #000000;
+  --red: var(--accent-c); --red-soft: #FFFFFF; --on-red: #FFFFFF; --green: #0B4D2A; --shadow: 0 0 0 2px #000; color-scheme: light }
+:root[data-mode="contrast"] .handnote { border: 2px solid #000; }
+:root[data-mode="contrast"] .btn, :root[data-mode="contrast"] .chip, :root[data-mode="contrast"] .tab { border-width: 2px; border-color: #000; }
+:root[data-accent="blue"]  { --accent-l: #2D5C9C; --accent-d: #86ACEA; --accent-c: #173E73; --soft-l: #E2EAF6; --soft-d: #1E2A3D; }
+:root[data-accent="green"] { --accent-l: #2C6847; --accent-d: #72C497; --accent-c: #174A2E; --soft-l: #E0EFE6; --soft-d: #1C3326; }
+:root[data-accent="plum"]  { --accent-l: #7A3B7E; --accent-d: #D398D6; --accent-c: #55205A; --soft-l: #F1E4F2; --soft-d: #33213A; }
+:root[data-accent="teal"]  { --accent-l: #1D6669; --accent-d: #62C6C6; --accent-c: #0E4547; --soft-l: #DDEFEF; --soft-d: #163234; }
+:root[data-accent="amber"] { --accent-l: #88560F; --accent-d: #E2AA5C; --accent-c: #5E3A06; --soft-l: #F6EBD9; --soft-d: #3A2C17; }
+html { font-size: 100%; }
+:root[data-text="large"] { font-size: 112.5%; }
+:root[data-text="xl"] { font-size: 125%; }
+:root[data-motion="reduce"] *, :root[data-motion="reduce"] *::before { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+:root[data-motion="reduce"] .rcard:hover { transform: none; }
 
 * { box-sizing: border-box }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.5; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 1.0625rem; line-height: 1.5; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--paper); z-index: 10; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
@@ -57,7 +91,7 @@ header.top p { margin: 6px 0 0; color: var(--muted); max-width: 52ch; }
 .head-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); background: var(--card); padding: 10px 16px; border-radius: 8px; cursor: pointer; min-height: 44px; text-decoration: none; }
 .btn:hover { border-color: var(--muted); }
-.btn.primary { background: var(--red); border-color: var(--red); color: #fff; font-weight: 700; }
+.btn.primary { background: var(--red); border-color: var(--red); color: var(--on-red); font-weight: 700; }
 .btn.primary:hover { filter: brightness(1.07); }
 .btn.ghost { background: transparent; }
 .btn.danger { color: var(--red); }
@@ -162,7 +196,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
 .tagchip { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 3px 10px; font-size: .82rem; cursor: pointer; color: var(--muted); }
 .tagchip:hover { color: var(--ink); border-color: var(--muted); }
 .rcard { position: relative; }
-.rcard .pick { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--muted); background: var(--card); color: #fff; display: grid; place-items: center; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,.4); z-index: 1; }
+.rcard .pick { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--muted); background: var(--card); color: var(--on-red); display: grid; place-items: center; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,.4); z-index: 1; }
 .rcard[aria-pressed="true"] { outline: 3px solid var(--red); outline-offset: 2px; }
 .rcard[aria-pressed="true"] .pick { background: var(--red); border-color: var(--red); }
 .selbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--card); border-top: 1px solid var(--line); box-shadow: 0 -4px 18px rgba(0,0,0,.15); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
@@ -180,6 +214,38 @@ body.selecting { padding-bottom: 140px; }
 .copyto { display: grid; gap: 8px; width: 100%; }
 .copyto .opts { display: flex; flex-wrap: wrap; gap: 8px; }
 
+.skip { position: absolute; left: 12px; top: -60px; z-index: 80; background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 700; }
+.skip:focus { top: calc(12px + env(safe-area-inset-top, 0px)); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.topbar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
+.topbar .boxnav { margin-bottom: 0; }
+.me-actions { display: flex; gap: 8px; margin-left: auto; }
+.iconbtn { position: relative; padding: 10px 12px; }
+.iconbtn svg { width: 22px; height: 22px; display: block; }
+.badge { position: absolute; top: -6px; right: -6px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--red); color: var(--on-red); font-size: .78rem; font-weight: 700; display: grid; place-items: center; }
+.here { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 0; font-size: .92rem; color: var(--ink); }
+.here .dot, .people .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); display: inline-block; flex: none; }
+.people .who { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.people .seen { font-size: .82rem; color: var(--muted); }
+.feed { list-style: none; padding: 0; margin: 0; display: grid; }
+.feed button { width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--rule); background: none; padding: 12px 4px; cursor: pointer; display: grid; gap: 2px; }
+.feed button:hover { background: var(--paper); }
+.feed .when { font-size: .82rem; color: var(--muted); }
+.feed .new { font-weight: 700; }
+.feed .new .when::before { content: "New · "; color: var(--red); }
+.prefs fieldset { border: 0; padding: 0; margin: 0 0 14px; min-width: 0; }
+.prefs legend { font-weight: 700; font-size: .92rem; padding: 0; margin-bottom: 6px; }
+.prefs .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.prefs .opt { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-height: 44px; cursor: pointer; background: var(--card); }
+.prefs .opt:has(input:checked) { border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
+.prefs .opt input { accent-color: var(--red); width: 18px; height: 18px; margin: 0; }
+.prefs .sw { width: 18px; height: 18px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,.25); }
+.prefs .check { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; cursor: pointer; }
+.prefs .check input { width: 20px; height: 20px; flex: none; margin: 2px 0 0; accent-color: var(--red); }
+.prefs .field { margin-bottom: 12px; }
+.prefs .hint { font-size: .85rem; color: var(--muted); margin: 4px 0 12px; }
+.update-banner { position: fixed; left: 50%; transform: translateX(-50%); top: calc(10px + env(safe-area-inset-top, 0px)); z-index: 75; background: var(--ink); color: var(--paper); padding: 8px 8px 8px 16px; border-radius: 10px; display: flex; gap: 12px; align-items: center; box-shadow: var(--shadow); max-width: calc(100vw - 24px); }
+.update-banner .btn { min-height: 38px; padding: 6px 12px; background: var(--paper); color: var(--ink); border: 0; }
 .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; cursor: zoom-out; }
 .lightbox img { max-height: 100%; max-width: 100%; object-fit: contain; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 8px; z-index: 70; box-shadow: var(--shadow); max-width: calc(100vw - 32px); }
@@ -187,13 +253,15 @@ body.selecting { padding-bottom: 140px; }
 </style>
 </head>
 <body>
+<a class="skip" id="skipLink" href="#main" hidden>Skip to the recipes</a>
+<div class="update-banner" id="updateBanner" role="status" hidden><span id="updateText">A new version of the Recipe Box is ready.</span><button class="btn" id="updateNowBtn" type="button">Update now</button><button class="btn" id="updateLaterBtn" type="button" aria-label="Not now">Later</button></div>
 <div class="wrap">
 
   <!-- Loading -->
   <p id="loading" class="status">Opening the recipe box…</p>
 
   <!-- Sign in -->
-  <section id="authScreen" class="auth cardpanel" hidden>
+  <main id="authScreen" class="auth cardpanel" hidden>
     <div id="inviteBanner" class="invite-banner" hidden>You've been invited to a family recipe box. Sign in or create an account to join.</div>
     <h1>The Family Recipe Box</h1>
     <p class="lede">Grandma's cards, Mom's cookbook, and everything we've saved since. Uses the same account as Bookshelf.</p>
@@ -211,15 +279,25 @@ body.selecting { padding-bottom: 140px; }
       <p class="status" id="authStatus" aria-live="polite"></p>
       <div class="switch" id="authSwitch"></div>
     </div>
-  </section>
+  </main>
 
   <!-- The box -->
-  <div id="appScreen" hidden>
-    <nav class="boxnav" id="boxNav" aria-label="Your recipe boxes"></nav>
+  <main id="appScreen" hidden>
+    <div class="topbar">
+      <nav class="boxnav" id="boxNav" aria-label="Your recipe boxes"></nav>
+      <div class="me-actions">
+        <button class="btn iconbtn" id="bellBtn" type="button" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span class="badge" id="bellCount" aria-hidden="true" hidden></span>
+        </button>
+        <button class="btn" id="meBtn" type="button">Your settings</button>
+      </div>
+    </div>
     <header class="top">
       <div>
         <h1 id="boxTitle">My recipes</h1>
         <p id="boxSub"></p>
+        <p id="hereNow" class="here" hidden></p>
       </div>
       <div class="head-actions">
         <button class="btn" id="familyBtn" type="button">Family &amp; settings</button>
@@ -227,6 +305,8 @@ body.selecting { padding-bottom: 140px; }
       </div>
     </header>
 
+    <section id="main" tabindex="-1" aria-labelledby="recipesH">
+    <h2 class="sr-only" id="recipesH">Recipes</h2>
     <div class="tools" id="tools" hidden>
       <input class="search" id="q" type="search" placeholder="Search recipes, ingredients, notes…" aria-label="Search recipes">
       <select class="cat" id="cat" aria-label="Filter by category"></select>
@@ -237,7 +317,7 @@ body.selecting { padding-bottom: 140px; }
 
     <p id="boxLoading" class="status">Opening the recipe box…</p>
     <div id="grid" class="grid" hidden></div>
-    <div class="selbar" id="selBar" hidden><div class="in" id="selIn"></div></div>
+    <div class="selbar" id="selBar" hidden role="region" aria-label="Selected recipes"><div class="in" id="selIn"></div></div>
     <p id="nomatch" class="status" hidden>No recipes match that search.</p>
 
     <section class="cardpanel" id="empty" hidden>
@@ -253,7 +333,8 @@ body.selecting { padding-bottom: 140px; }
         <button class="btn" id="emptyInvite" type="button">Invite the family</button>
       </div>
     </section>
-  </div>
+    </section>
+  </main>
 </div>
 
 <!-- Recipe view -->
@@ -337,7 +418,19 @@ body.selecting { padding-bottom: 140px; }
 <!-- Family & settings -->
 <dialog id="familyDlg" class="narrow" aria-labelledby="fTitleH"><div class="sheet" id="familySheet"></div></dialog>
 
-<div class="toast" id="toast" role="status" hidden></div>
+<!-- Notifications -->
+<dialog id="notifDlg" class="narrow" aria-labelledby="nTitle"><div class="sheet">
+  <button class="close" type="button" data-close aria-label="Close">×</button>
+  <h2 id="nTitle">Notifications</h2>
+  <ul class="feed" id="feed"></ul>
+  <p class="status" id="feedEmpty" hidden>Nothing new yet. When family members join your boxes, add recipes or share memories, it shows up here.</p>
+  <p style="margin-top:16px"><button class="linkbtn" type="button" id="notifPrefsBtn">Choose what you're notified about</button></p>
+</div></dialog>
+
+<!-- Your settings -->
+<dialog id="meDlg" class="narrow" aria-labelledby="meTitle"><div class="sheet prefs" id="meSheet"></div></dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
 (() => {
@@ -357,7 +450,7 @@ body.selecting { padding-bottom: 140px; }
   const MAX_AI_IMAGES = 3;   // photos the reader looks at in one go
   const MAX_PHOTOS = 6;      // photos kept per recipe
   const TEXT_MODEL   = "openai/gpt-oss-20b";
-  const APP_VERSION  = "1.3";
+  const APP_VERSION  = "1.4";
 
   firebase.initializeApp(FIREBASE_CONFIG);
   const auth = firebase.auth();
@@ -407,6 +500,7 @@ body.selecting { padding-bottom: 140px; }
   }
   function show(id) {
     for (const s of ["loading", "authScreen", "appScreen"]) $("#" + s).hidden = s !== id;
+    $("#skipLink").hidden = id !== "appScreen";
   }
 
   // ─── state ─────────────────────────────────────────────────────────────────
@@ -424,6 +518,7 @@ body.selecting { padding-bottom: 140px; }
   // Invite link: ?join=<boxId>~<code>
   const params = new URLSearchParams(location.search);
   if (params.get("join")) { lsSet("rb_join", params.get("join")); history.replaceState(null, "", location.pathname + location.hash); }
+  else if (params.has("v")) history.replaceState(null, "", location.pathname + location.hash);   // left by "Update now"
   const pendingJoin = () => { const v = lsGet("rb_join"); const m = v && v.match(/^([A-Za-z0-9]{1,40})~([a-z0-9]{16,40})$/); return m ? { boxId: m[1], code: m[2] } : null; };
 
   const myName = () => (me && (me.displayName || (me.email || "").split("@")[0])) || "Family member";
@@ -496,7 +591,7 @@ body.selecting { padding-bottom: 140px; }
   document.querySelectorAll("[data-signout]").forEach((b) => b.addEventListener("click", () => auth.signOut()));
 
   auth.onAuthStateChanged((u) => {
-    if (!u) { me = null; stopBoxes(); stopListening(); box = null; $("#inviteBanner").hidden = !pendingJoin(); show("authScreen"); return; }
+    if (!u) { stopPrefs(); stopActivity(); me = null; stopBoxes(); stopListening(); box = null; $("#updateBanner").hidden = true; $("#inviteBanner").hidden = !pendingJoin(); show("authScreen"); return; }
     onSignedIn(u);
   });
 
@@ -515,6 +610,7 @@ body.selecting { padding-bottom: 140px; }
     show("loading");
     try {
       await ensurePersonalBox();
+      watchPrefs();
       const j = pendingJoin();
       if (j) await joinBox(j);
       watchBoxes();
@@ -543,6 +639,7 @@ body.selecting { padding-bottom: 140px; }
         joinCode: code,
       });
       lsSet("rb_box", boxId);
+      logActivity(boxId, { type: "join" });   // lets the box's owner know
       toast("You've joined the family recipe box");
     } catch (e) {
       // Already a member: the update is refused by the rules, which is fine.
@@ -562,8 +659,10 @@ body.selecting { padding-bottom: 140px; }
         first = false;
         const want = lsGet("rb_box");
         openBox((boxes.find((b) => b.id === want) || boxes.find(isPersonal) || boxes[0]).id);
+        syncActivity();
         return;
       }
+      syncActivity(); drawBell();
       const fresh = box && boxes.find((b) => b.id === box.id);
       if (box && !fresh) { toast(`You're no longer in ${boxLabel(box)}.`); openBox(personalId()); return; }
       if (fresh) { box = fresh; drawBoxChrome(); }
@@ -578,7 +677,7 @@ body.selecting { padding-bottom: 140px; }
     $("#boxSub").textContent = isPersonal(box)
       ? "Only you can see these. Copy any recipe into a family box to share it."
       : `Shared with ${n} ${n === 1 ? "person" : "people"}. Anyone in the box can add a recipe or a memory.`;
-    $("#familyBtn").textContent = isPersonal(box) ? "Settings" : "Family & settings";
+    $("#familyBtn").textContent = isPersonal(box) ? "Box options" : "Family & settings";
     $("#emptyInvite").textContent = isPersonal(box) ? "Start a family box" : "Invite the family";
     $("#emptyTitle").textContent = isPersonal(box) ? "Your recipe box is ready for its first card" : "The family box is ready for its first card";
     const nav = $("#boxNav"); nav.replaceChildren(
@@ -592,6 +691,7 @@ body.selecting { padding-bottom: 140px; }
     }
     if ($("#familyDlg").open) drawFamily();
     if (openId) renderDetail();
+    drawHere();
   }
   const nameFixed = new Set();
 
@@ -629,6 +729,7 @@ body.selecting { padding-bottom: 140px; }
     if (openId) closeRecipe();
     if (!copyingMany) endSelect();
     if (!keepHash && location.hash.startsWith("#r-")) history.replaceState(null, "", location.pathname + location.search);
+    if (box && box.id !== id) leavePresence(box.id);
     stopListening();
     box = b;
     lsSet("rb_box", id);
@@ -637,6 +738,7 @@ body.selecting { padding-bottom: 140px; }
     $("#boxLoading").hidden = false; $("#boxLoading").textContent = "Opening…";
     $("#grid").hidden = true; $("#empty").hidden = true; $("#tools").hidden = true; $("#chips").hidden = true; $("#nomatch").hidden = true;
     const ref = fs.doc("recipeBoxes/" + id);
+    watchPresence(ref);
     let firstRecipes = true;
     const slow = setTimeout(() => { if (firstRecipes) $("#boxLoading").textContent = "Still opening… if this doesn't finish, check your connection and reload."; }, 10000);
 
@@ -682,8 +784,7 @@ body.selecting { padding-bottom: 140px; }
       copiedFrom: { boxId: box.id, recipeId: r.id, boxName: boxLabel(box), addedByName: r.addedBy === me.uid ? myName() : nameOf(r.addedBy, r.addedByName) },
     };
     if (r.thumb && photoIds.length) data.thumb = r.thumb;
-    await tref.collection("recipes").add(data);
-    return "copied";
+    return (await tref.collection("recipes").add(data)).id;
   }
 
   // ─── select several recipes and copy them to another box ─────────────────
@@ -729,12 +830,14 @@ body.selecting { padding-bottom: 140px; }
     copyingMany = true;
     const inner = $("#selIn");
     let copied = 0, dup = 0, failed = 0;
+    const ids = [], titles = [];
     for (const [i, r] of list.entries()) {
       fill(inner, el("span", { class: "n", "aria-live": "polite", text: `Copying ${i + 1} of ${list.length} to ${boxLabel(target)}…` }));
-      try { (await copyRecipe(r, target, false)) === "duplicate" ? dup++ : copied++; }
+      try { const res = await copyRecipe(r, target, false); if (res === "duplicate") dup++; else { copied++; ids.push(res); titles.push(r.title); } }
       catch (e) { console.error(e); failed++; }
     }
     copyingMany = false;
+    if (copied) logActivity(target.id, { type: "recipe", recipeIds: ids.slice(0, 20), titles: titles.slice(0, 5), count: copied });
     const parts = copied || !dup
       ? [`Copied ${copied} recipe${copied === 1 ? "" : "s"} to ${boxLabel(target)}.`]
       : [`${dup === 1 ? "That recipe was" : `All ${dup} were`} already in ${boxLabel(target)}, so nothing was copied.`];
@@ -859,7 +962,11 @@ body.selecting { padding-bottom: 140px; }
     const memForm = el("form", { class: "memform", onsubmit: async (e) => {
       e.preventDefault();
       const text = memInput.value.trim(); if (!text) return;
-      try { await boxRef().collection("memories").add({ recipeId: r.id, text, by: me.uid, byName: myName(), createdAt: FV.serverTimestamp() }); memInput.value = ""; memInput.blur(); toast("Memory added"); }
+      try {
+        await boxRef().collection("memories").add({ recipeId: r.id, text, by: me.uid, byName: myName(), createdAt: FV.serverTimestamp() });
+        logActivity(box.id, { type: "memory", recipeId: r.id, title: r.title, text: text.slice(0, 140), recipeBy: r.addedBy });
+        memInput.value = ""; memInput.blur(); toast("Memory added");
+      }
       catch { toast("Couldn't save that memory. Please try again."); }
     } }, memInput, el("button", { class: "btn", type: "submit", text: "Add" }));
 
@@ -890,6 +997,7 @@ body.selecting { padding-bottom: 140px; }
             st.append(el("button", { class: "linkbtn", type: "button", text: "Copy it again anyway", onclick: () => go(target, true) }));
             return;
           }
+          logActivity(target.id, { type: "recipe", recipeIds: [res], titles: [r.title], count: 1 });
           toast(`Copied to ${boxLabel(target)}`);
           drawActions();
         } catch (e) {
@@ -1199,6 +1307,7 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
         if (!thumb) delete data.thumb;
         const nr = await ref.collection("recipes").add({ ...data, addedBy: me.uid, addedByName: myName(), createdAt: FV.serverTimestamp() });
         id = nr.id;
+        logActivity(box.id, { type: "recipe", recipeIds: [id], titles: [title], count: 1 });
       }
       editPhotos = [];
       editDlg.close();
@@ -1245,7 +1354,10 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
         } }), " (people already in the box stay in).") : null,
       personal ? null : el("div", { class: "section-label", text: `In the box (${(box.members || []).length})` }),
       personal ? null : el("ul", { class: "people" }, ...(box.members || []).map((uid) => el("li", {},
-        el("span", { text: (names[uid] || "Family member") + (uid === box.ownerUid ? " · owner" : "") + (uid === me.uid ? " (you)" : "") }),
+        el("span", { class: "who" },
+          uid !== me.uid && activeNow(uid) ? el("span", { class: "dot", "aria-hidden": "true" }) : null,
+          el("span", { text: (names[uid] || "Family member") + (uid === box.ownerUid ? " · owner" : "") + (uid === me.uid ? " (you)" : "") }),
+          uid !== me.uid && lastSeen(uid) ? el("span", { class: "seen", text: lastSeen(uid) }) : null),
         owner && uid !== me.uid ? el("button", { class: "linkbtn", type: "button", text: "Remove", onclick: async () => {
           try { await boxRef().update({ members: FV.arrayRemove(uid), ["memberNames." + uid]: FV.delete() }); toast("Removed from the box"); } catch { toast("Couldn't remove them."); }
         } }) : null))),
@@ -1254,16 +1366,14 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
         el("form", { class: "copyrow", onsubmit: async (e) => { e.preventDefault(); const v = $("#renameInput").value.trim(); if (!v) return; try { await boxRef().update({ name: v }); toast("Renamed"); } catch { toast("Couldn't rename it."); } } },
           el("input", { id: "renameInput", value: box.name || "", maxlength: "80", "aria-label": "Box name" }), el("button", { class: "btn", type: "submit", text: "Rename" })),
       ] : null,
-      el("div", { class: "section-label", text: "Your account" }),
-      el("p", { style: "margin:0", text: `Signed in as ${myName()}${me.email ? " (" + me.email + ")" : ""}` }),
+      el("div", { class: "section-label", text: "Backup" }),
       el("div", { class: "menu-list" },
         el("button", { class: "btn", type: "button", text: `Download a backup of ${personal ? "my recipes" : "this box"}`, onclick: downloadBackup }),
         el("label", { class: "btn", for: "importInput", text: `Import recipes into ${personal ? "my recipes" : "this box"}…` }),
         el("input", { id: "importInput", type: "file", accept: ".json,application/json", hidden: true, onchange: (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) importFile(f); } }),
         el("p", { class: "status", id: "importStatus", "aria-live": "polite" }),
         !owner && !personal ? el("button", { class: "btn ghost danger", type: "button", text: "Leave this recipe box", onclick: leaveBox }) : null,
-        el("button", { class: "btn ghost", type: "button", text: "Sign out", onclick: () => { familyDlg.close(); auth.signOut(); } })),
-      el("p", { style: "font-size:.78rem;color:var(--muted);margin-top:18px", text: "Family Recipe Box " + APP_VERSION }));
+        el("button", { class: "btn ghost", type: "button", text: "Your settings: look, notifications, sign out", onclick: () => { familyDlg.close(); openMe(); } })));
   }
 
   async function leaveBox() {
@@ -1287,6 +1397,7 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
     const ref = boxRef();
     const have = new Set(recipes.map((r) => r.title.trim().toLowerCase()));
     let added = 0, skipped = 0;
+    const newIds = [], newTitles = [];
     for (const r of list0) {
       const title = str(r.title, 200).trim();
       if (have.has(title.toLowerCase())) { skipped++; continue; }
@@ -1310,9 +1421,10 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
         for (const m of mems.filter((m) => m && m.recipeId === r.id && str(m.text).trim())) {
           await ref.collection("memories").add({ recipeId: nr.id, text: str(m.text, 1000), by: me.uid, byName: str(m.byName, 100) || myName(), createdAt: FV.serverTimestamp() });
         }
-        have.add(title.toLowerCase()); added++;
-      } catch (e) { console.error(e); say(`Stopped at “${title}”. ${added} imported so far. Check your connection and import the file again; recipes already in the box are skipped.`, "err"); return; }
+        have.add(title.toLowerCase()); added++; newIds.push(nr.id); newTitles.push(title);
+      } catch (e) { console.error(e); if (added) logActivity(box.id, { type: "recipe", recipeIds: newIds.slice(0, 20), titles: newTitles.slice(0, 5), count: added }); say(`Stopped at “${title}”. ${added} imported so far. Check your connection and import the file again; recipes already in the box are skipped.`, "err"); return; }
     }
+    if (added) logActivity(box.id, { type: "recipe", recipeIds: newIds.slice(0, 20), titles: newTitles.slice(0, 5), count: added });
     say(`Imported ${added} recipe${added === 1 ? "" : "s"}${skipped ? `. Skipped ${skipped} already in the box (same name)` : ""}.`, "ok");
   }
 
@@ -1331,6 +1443,368 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
       setTimeout(() => URL.revokeObjectURL(a.href), 5000);
     } catch (e) { console.error(e); toast("Couldn't make the backup."); }
   }
+
+  // ─── your settings: look, notifications, privacy ───────────────────────────
+  const THEME_DEFAULT = { mode: "system", accent: "red", text: "normal", motion: "system" };
+  const NOTIFY_DEFAULT = { join: "app", recipe: "app", memory: "app" };
+  const MODES = [["system", "Match my device"], ["light", "Light"], ["dark", "Dark"], ["contrast", "High contrast"]];
+  const ACCENTS = [["red", "Recipe red", "#B33636"], ["blue", "Blue", "#2D5C9C"], ["green", "Green", "#2C6847"], ["plum", "Plum", "#7A3B7E"], ["teal", "Teal", "#1D6669"], ["amber", "Amber", "#88560F"]];
+  const SIZES = [["normal", "Standard"], ["large", "Large"], ["xl", "Extra large"]];
+  const LEVELS = [["off", "Off"], ["app", "In the app"], ["device", "In the app and on this device"]];
+  const EVENTS = [["join", "Someone joins a box you own"], ["recipe", "New recipes in a family box"], ["memory", "A memory is shared on a recipe you added"]];
+  const pick = (v, opts, d) => (opts.some((o) => o[0] === v) ? v : d);
+  function cleanTheme(t) {
+    t = t && typeof t === "object" ? t : {};
+    return { mode: pick(t.mode, MODES, "system"), accent: pick(t.accent, ACCENTS, "red"), text: pick(t.text, SIZES, "normal"), motion: t.motion === "reduce" ? "reduce" : "system" };
+  }
+  function cleanNotify(n) {
+    n = n && typeof n === "object" ? n : {};
+    const out = {};
+    for (const [k] of EVENTS) out[k] = pick(n[k], LEVELS, NOTIFY_DEFAULT[k]);
+    return out;
+  }
+  let prefs = { theme: cleanTheme((() => { try { return JSON.parse(lsGet("rb_theme") || "{}"); } catch { return {}; } })()), notify: { ...NOTIFY_DEFAULT }, muted: [], showActive: true, seenAt: null };
+  let prefsUnsub = null, prefsLoaded = false;
+  const prefsRef = () => fs.doc("recipeUsers/" + me.uid);
+
+  function applyTheme(t) {
+    const d = document.documentElement;
+    const set = (k, v, def) => { if (v === def) delete d.dataset[k]; else d.dataset[k] = v; };
+    set("mode", t.mode, "system"); set("accent", t.accent, "red"); set("text", t.text, "normal"); set("motion", t.motion, "system");
+    lsSet("rb_theme", JSON.stringify(t));
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = getComputedStyle(d).getPropertyValue("--red").trim() || "#B33636";
+  }
+  applyTheme(prefs.theme);
+
+  function watchPrefs() {
+    if (prefsUnsub) prefsUnsub();
+    prefsLoaded = false;
+    prefsUnsub = prefsRef().onSnapshot((s) => {
+      const v = s.exists ? s.data() : {};
+      if (s.exists && v.theme) { prefs.theme = cleanTheme(v.theme); applyTheme(prefs.theme); }
+      else if (!s.exists) savePrefs({ theme: prefs.theme });   // first visit: keep the look picked on this device
+      prefs.notify = cleanNotify(v.notify);
+      prefs.muted = Array.isArray(v.muted) ? v.muted.filter((x) => typeof x === "string") : [];
+      prefs.showActive = v.showActive !== false;
+      if (v.seenAt && typeof v.seenAt.toDate === "function") prefs.seenAt = v.seenAt;
+      prefsLoaded = true;
+      syncActivity(); drawBell();
+      if ($("#meDlg").open && !$("#meDlg").contains(document.activeElement)) drawMe();
+    }, (e) => console.error(e));
+  }
+  function stopPrefs() { if (prefsUnsub) { prefsUnsub(); prefsUnsub = null; } }
+  function savePrefs(patch) {
+    if (!me) return Promise.resolve();
+    return prefsRef().set(patch, { merge: true }).catch((e) => { console.error(e); toast("Couldn't save that setting. Check your connection."); });
+  }
+  function setTheme(patch) {
+    prefs.theme = cleanTheme({ ...prefs.theme, ...patch });
+    applyTheme(prefs.theme);
+    savePrefs({ theme: prefs.theme });
+  }
+
+  const meDlg = $("#meDlg");
+  meDlg.addEventListener("click", (e) => { if (e.target === meDlg) meDlg.close(); });
+  function openMe(focusId) {
+    drawMe();
+    if (!meDlg.open) meDlg.showModal();
+    if (focusId) { const n = document.getElementById(focusId); if (n) { n.scrollIntoView({ block: "start" }); n.focus(); } }
+  }
+  $("#meBtn").addEventListener("click", () => openMe());
+
+  function radios(name, opts, value, onPick, swatch) {
+    return el("div", { class: "opts" }, opts.map(([v, label, color]) => el("label", { class: "opt" },
+      el("input", { type: "radio", name, value: v, checked: v === value, onchange: () => onPick(v) }),
+      swatch ? el("span", { class: "sw", style: "background:" + color, "aria-hidden": "true" }) : null,
+      el("span", { text: label }))));
+  }
+  function drawMe() {
+    const sheet = $("#meSheet");
+    const t = prefs.theme;
+    const shared = boxes.filter((b) => !isPersonal(b));
+    const nst = el("p", { class: "status", id: "notifStatus", "aria-live": "polite" });
+    const ust = el("p", { class: "status", id: "updateStatus", "aria-live": "polite" });
+    const canNotify = "Notification" in window;
+    fill(sheet,
+      el("button", { class: "close", type: "button", "aria-label": "Close", text: "×", onclick: () => meDlg.close() }),
+      el("h2", { id: "meTitle", text: "Your settings" }),
+
+      el("div", { class: "section-label", id: "lookSection", tabindex: "-1", text: "Appearance" }),
+      el("fieldset", {}, el("legend", { text: "Theme" }), radios("pMode", MODES, t.mode, (v) => setTheme({ mode: v }))),
+      el("fieldset", {}, el("legend", { text: "Color" }), radios("pAccent", ACCENTS, t.accent, (v) => setTheme({ accent: v }), true)),
+      el("fieldset", {}, el("legend", { text: "Text size" }), radios("pText", SIZES, t.text, (v) => setTheme({ text: v }))),
+      el("label", { class: "check" }, el("input", { type: "checkbox", checked: t.motion === "reduce", onchange: (e) => setTheme({ motion: e.target.checked ? "reduce" : "system" }) }),
+        el("span", {}, "Reduce motion", el("br"), el("small", { style: "color:var(--muted)", text: "Turns off the little movements when you point at a card. If your device is set to reduce motion, that's always respected." }))),
+      el("button", { class: "btn", type: "button", text: "Reset to the default look", onclick: () => { setTheme(THEME_DEFAULT); drawMe(); toast("Back to the default look"); } }),
+
+      el("div", { class: "section-label", id: "notifSection", tabindex: "-1", text: "Notifications" }),
+      EVENTS.map(([k, label]) => el("div", { class: "field" },
+        el("label", { for: "pn-" + k, text: label }),
+        el("select", { id: "pn-" + k, onchange: (e) => setNotify(k, e.target.value, e.target, nst) },
+          LEVELS.map(([v, l]) => el("option", { value: v, text: l, selected: prefs.notify[k] === v }))))),
+      el("p", { class: "hint", text: canNotify
+        ? "“On this device” pops up an alert while the Recipe Box is open, even when you're in another tab or app. It can't reach you once the app is fully closed. On iPhone, add the Recipe Box to your Home Screen first."
+        : "This browser can't show alerts, so notifications appear in the app (the bell at the top). On iPhone, add the Recipe Box to your Home Screen to get alerts." }),
+      shared.length ? el("fieldset", {}, el("legend", { text: "Notify me about these family boxes" }),
+        shared.map((b) => el("label", { class: "check" },
+          el("input", { type: "checkbox", checked: !prefs.muted.includes(b.id), onchange: (e) => {
+            prefs.muted = e.target.checked ? prefs.muted.filter((x) => x !== b.id) : [...new Set([...prefs.muted, b.id])];
+            savePrefs({ muted: prefs.muted }); syncActivity(); drawBell();
+          } }), el("span", { text: boxLabel(b) })))) : null,
+      nst,
+
+      el("div", { class: "section-label", text: "Privacy" }),
+      el("label", { class: "check" }, el("input", { type: "checkbox", checked: prefs.showActive, onchange: (e) => {
+          prefs.showActive = e.target.checked; savePrefs({ showActive: prefs.showActive });
+          if (prefs.showActive) heartbeat(); else hidePresence();
+        } }),
+        el("span", {}, "Let the family see when I'm using the Recipe Box", el("br"), el("small", { style: "color:var(--muted)", text: "Shows “here now” next to your name in family boxes. Turn it off and you won't appear." }))),
+
+      el("div", { class: "section-label", text: "App" }),
+      el("p", { style: "margin:0 0 8px", text: "Family Recipe Box " + APP_VERSION }),
+      el("button", { class: "btn", type: "button", id: "checkUpdateBtn", text: "Check for updates", onclick: () => checkForUpdate(true) }),
+      ust,
+
+      el("div", { class: "section-label", text: "Your account" }),
+      el("p", { style: "margin:0", text: `Signed in as ${myName()}${me && me.email ? " (" + me.email + ")" : ""}` }),
+      el("div", { class: "menu-list" },
+        el("button", { class: "btn ghost", type: "button", text: "Sign out", onclick: () => { meDlg.close(); signOut(); } })));
+  }
+  async function setNotify(k, v, sel, st) {
+    const say = (m, cls = "") => { st.textContent = m; st.className = "status " + cls; };
+    if (v === "device") {
+      if (!("Notification" in window)) { sel.value = prefs.notify[k]; say("This browser can't show alerts. On iPhone, add the Recipe Box to your Home Screen first, then open it from there.", "err"); return; }
+      let perm = Notification.permission;
+      if (perm === "default") { try { perm = await Notification.requestPermission(); } catch { perm = "denied"; } }
+      if (perm !== "granted") { sel.value = prefs.notify[k]; say("Alerts are blocked for this site. Allow notifications in your browser's settings, then try again.", "err"); return; }
+      registerSW();
+    }
+    prefs.notify = { ...prefs.notify, [k]: v };
+    savePrefs({ notify: prefs.notify });
+    say("Saved.", "ok");
+    syncActivity(); drawBell();
+  }
+  function signOut() {
+    hidePresence();
+    stopPrefs(); stopActivity();
+    auth.signOut();
+  }
+
+  // ─── notifications: an activity feed in each family box ────────────────────
+  // Whoever does something writes one small entry; everyone else's app reads the feeds of their boxes.
+  function logActivity(boxId, data) {
+    const b = boxes.find((x) => x.id === boxId);
+    if (!me || (b && isPersonal(b)) || String(boxId).startsWith("p_")) return;
+    fs.collection(`recipeBoxes/${boxId}/activity`).add({ ...data, by: me.uid, byName: myName(), createdAt: FV.serverTimestamp() }).catch((e) => console.error(e));
+  }
+  const actUnsubs = new Map();     // boxId -> unsubscribe
+  const activity = new Map();      // boxId -> [items]
+  const sessionStart = Date.now();
+  function stopActivity() { for (const f of actUnsubs.values()) { try { f(); } catch {} } actUnsubs.clear(); activity.clear(); }
+  function syncActivity() {
+    if (!me || !prefsLoaded) return;
+    const want = new Set(boxes.filter((b) => !isPersonal(b) && !prefs.muted.includes(b.id)).map((b) => b.id));
+    for (const [id, f] of actUnsubs) if (!want.has(id)) { try { f(); } catch {} actUnsubs.delete(id); activity.delete(id); }
+    for (const id of want) {
+      if (actUnsubs.has(id)) continue;
+      let first = true;
+      const since = new Date(Date.now() - 60 * 24 * 3600 * 1000);
+      actUnsubs.set(id, fs.collection(`recipeBoxes/${id}/activity`).where("createdAt", ">", since).orderBy("createdAt", "desc").limit(30).onSnapshot((snap) => {
+        activity.set(id, snap.docs.map((d) => cleanAct(d.id, id, d.data())));
+        if (!first) for (const ch of snap.docChanges()) if (ch.type === "added") announce(cleanAct(ch.doc.id, id, ch.doc.data()));
+        first = false;
+        drawBell();
+        if ($("#notifDlg").open) drawFeed();
+      }, (e) => {
+        // A box that was created a moment ago may not be saved yet; try again shortly.
+        console.error(e); actUnsubs.delete(id); setTimeout(syncActivity, 5000);
+      }));
+    }
+  }
+  function cleanAct(id, boxId, v) {
+    v = v || {};
+    return { id, boxId, type: str(v.type, 10), by: str(v.by, 200), byName: str(v.byName, 100) || "Someone", createdAt: v.createdAt,
+      count: Math.max(1, Math.min(10000, +v.count || 1)), titles: Array.isArray(v.titles) ? v.titles.slice(0, 5).map((x) => str(x, 200)) : [],
+      recipeIds: Array.isArray(v.recipeIds) ? v.recipeIds.slice(0, 20).map((x) => str(x, 100)) : [],
+      recipeId: str(v.recipeId, 100), title: str(v.title, 200), text: str(v.text, 160), recipeBy: str(v.recipeBy, 200) };
+  }
+  function levelFor(a) {
+    const b = boxes.find((x) => x.id === a.boxId);
+    if (!b || !me || a.by === me.uid) return "off";
+    if (a.type === "join") return b.ownerUid === me.uid ? prefs.notify.join : "off";
+    if (a.type === "recipe") return prefs.notify.recipe;
+    if (a.type === "memory") return a.recipeBy === me.uid ? prefs.notify.memory : "off";
+    return "off";
+  }
+  function actText(a) {
+    const b = boxes.find((x) => x.id === a.boxId);
+    const where = boxLabel(b);
+    if (a.type === "join") return `${a.byName} joined ${where}`;
+    if (a.type === "memory") return `${a.byName} shared a memory on ${a.title || "a recipe"}${a.text ? `: “${a.text}”` : ""}`;
+    if (a.count === 1) return `${a.byName} added ${a.titles[0] || "a recipe"} to ${where}`;
+    return `${a.byName} added ${a.count} recipes to ${where}` + (a.titles.length ? ` (${a.titles.slice(0, 3).join(", ")}${a.count > 3 ? "…" : ""})` : "");
+  }
+  const feedItems = () => [...activity.values()].flat().filter((a) => levelFor(a) !== "off" && tsToDate(a.createdAt))
+    .sort((x, y) => tsToDate(y.createdAt) - tsToDate(x.createdAt));
+  const isNew = (a) => { const d = tsToDate(a.createdAt), s = tsToDate(prefs.seenAt); return d && (!s || d > s); };
+  function drawBell() {
+    const n = feedItems().filter(isNew).length;
+    const c = $("#bellCount");
+    c.hidden = !n; c.textContent = n > 99 ? "99+" : String(n);
+    $("#bellBtn").setAttribute("aria-label", n ? `Notifications, ${n} new` : "Notifications");
+  }
+  function announce(a) {
+    const lvl = levelFor(a);
+    if (lvl === "off") return;
+    const d = tsToDate(a.createdAt);
+    if (d && d.getTime() < sessionStart - 60000) return;
+    const text = actText(a);
+    if (document.visibilityState === "visible") toast(text);
+    else if (lvl === "device") deviceAlert(text, a);
+  }
+  function deepLink(a) {
+    const id = a.recipeId || (a.count === 1 && a.recipeIds[0]) || "";
+    return location.pathname + (id ? `#r-${a.boxId}.${id}` : "");
+  }
+  async function deviceAlert(text, a) {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    const opts = { body: text, icon: "icon192.png", badge: "icon192.png", tag: a.id, data: { url: deepLink(a) } };
+    try {
+      const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+      if (reg) { await reg.showNotification("Family Recipe Box", opts); return; }
+    } catch {}
+    try { const n = new Notification("Family Recipe Box", opts); n.onclick = () => { window.focus(); goToActivity(a); }; } catch {}
+  }
+  function registerSW() {
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+  if ("Notification" in window && Notification.permission === "granted") registerSW();
+
+  const notifDlg = $("#notifDlg");
+  notifDlg.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", () => notifDlg.close()));
+  notifDlg.addEventListener("click", (e) => { if (e.target === notifDlg) notifDlg.close(); });
+  $("#notifPrefsBtn").addEventListener("click", () => { notifDlg.close(); openMe("notifSection"); });
+  let feedSeen = null;   // the "seen up to" time when the panel opened, so new items stay marked while it's open
+  $("#bellBtn").addEventListener("click", () => {
+    feedSeen = prefs.seenAt;
+    drawFeed();
+    notifDlg.showModal();
+    prefs.seenAt = firebase.firestore.Timestamp.now();
+    savePrefs({ seenAt: FV.serverTimestamp() });
+    drawBell();
+  });
+  function drawFeed() {
+    const items = feedItems().slice(0, 40);
+    const s = tsToDate(feedSeen);
+    $("#feedEmpty").hidden = items.length > 0;
+    fill($("#feed"), items.map((a) => {
+      const fresh = !s || tsToDate(a.createdAt) > s;
+      return el("li", { class: fresh ? "new" : "" }, el("button", { type: "button", onclick: () => { notifDlg.close(); goToActivity(a); } },
+        el("span", { text: actText(a) }), el("span", { class: "when", text: ago(tsToDate(a.createdAt)) })));
+    }));
+  }
+  function goToActivity(a) {
+    const id = a.recipeId || (a.count === 1 && a.recipeIds[0]) || "";
+    if (id) { location.hash = `#r-${a.boxId}.${id}`; if (box && box.id === a.boxId) fromHash(); else if (boxes.some((b) => b.id === a.boxId)) openBox(a.boxId, true); }
+    else if (boxes.some((b) => b.id === a.boxId)) { openBox(a.boxId); if (a.type === "join") setTimeout(openFamily, 300); }
+  }
+  function ago(d) {
+    if (!d || isNaN(d)) return "";
+    const s = (Date.now() - d.getTime()) / 1000;
+    if (s < 90) return "just now";
+    if (s < 3600) return `${Math.round(s / 60)} min ago`;
+    if (s < 86400) { const h = Math.round(s / 3600); return `${h} hour${h === 1 ? "" : "s"} ago`; }
+    const days = Math.round(s / 86400);
+    if (days === 1) return "yesterday";
+    if (days < 7) return `${days} days ago`;
+    return d.toLocaleDateString();
+  }
+
+  // ─── who's here now ────────────────────────────────────────────────────────
+  // While the app is open on a family box, it refreshes a small "here" record every minute.
+  let presence = {};               // uid -> { name, at: Date, here }
+  const ACTIVE_MS = 150000;
+  const presenceRef = (boxId) => fs.doc(`recipeBoxes/${boxId}/presence/${me.uid}`);
+  const canShowMe = () => me && box && !isPersonal(box) && prefs.showActive && document.visibilityState === "visible";
+  function heartbeat() {
+    if (!canShowMe()) return;
+    presenceRef(box.id).set({ name: myName(), at: FV.serverTimestamp(), here: true }).catch(() => {});
+  }
+  function leavePresence(boxId) {
+    if (!me || !boxId || String(boxId).startsWith("p_") || !prefs.showActive) return;
+    presenceRef(boxId).set({ name: myName(), at: FV.serverTimestamp(), here: false }).catch(() => {});
+  }
+  function hidePresence() {
+    if (me && box && !isPersonal(box)) presenceRef(box.id).delete().catch(() => {});
+  }
+  setInterval(heartbeat, 60000);
+  setInterval(() => { if (box && !isPersonal(box)) drawHere(); }, 30000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") { heartbeat(); maybeCheckUpdate(); }
+    else if (box) leavePresence(box.id);
+  });
+  window.addEventListener("pagehide", () => { if (box) leavePresence(box.id); });
+  function watchPresence(ref) {
+    presence = {};
+    if (isPersonal(box)) { drawHere(); return; }
+    unsub.push(ref.collection("presence").onSnapshot((snap) => {
+      presence = {};
+      snap.docs.forEach((d) => { const v = d.data() || {}; presence[d.id] = { name: str(v.name, 100), at: tsToDate(v.at), here: v.here === true }; });
+      drawHere();
+      if ($("#familyDlg").open && !$("#familyDlg").contains(document.activeElement)) drawFamily();
+    }, (e) => console.error(e)));
+    heartbeat();
+  }
+  const activeNow = (uid) => { const p = presence[uid]; return !!(p && p.here && p.at && Date.now() - p.at.getTime() < ACTIVE_MS); };
+  function lastSeen(uid) {
+    if (activeNow(uid)) return "here now";
+    const p = presence[uid];
+    return p && p.at ? "active " + ago(p.at) : "";
+  }
+  function drawHere() {
+    const n = $("#hereNow");
+    if (!box || isPersonal(box)) { n.hidden = true; return; }
+    const others = (box.members || []).filter((uid) => uid !== me.uid && activeNow(uid)).map((uid) => (box.memberNames || {})[uid] || presence[uid].name || "Family member");
+    n.hidden = !others.length;
+    if (!others.length) return;
+    const list = others.length <= 3 ? others.join(others.length === 2 ? " and " : ", ") : `${others.slice(0, 2).join(", ")} and ${others.length - 2} more`;
+    fill(n, el("span", { class: "dot", "aria-hidden": "true" }), el("span", { text: `Here now: ${list}` }));
+  }
+
+  // ─── updates ───────────────────────────────────────────────────────────────
+  // Same idea as Bookshelf: fetch the live page, compare its version with this one, and offer to reload.
+  let lastUpdateCheck = 0, newVersion = null;
+  const verNum = (v) => String(v).split(".").map((x) => parseInt(x, 10) || 0);
+  const newer = (a, b) => { const x = verNum(a), y = verNum(b); for (let i = 0; i < Math.max(x.length, y.length); i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); } return false; };
+  async function checkForUpdate(manual) {
+    lastUpdateCheck = Date.now();
+    const st = manual ? $("#updateStatus") : null;
+    const btn = manual ? $("#checkUpdateBtn") : null;
+    if (st) { st.className = "status"; st.textContent = "Checking…"; btn.disabled = true; }
+    try {
+      const r = await fetch(location.pathname + "?check=" + Date.now(), { cache: "no-store" });
+      const m = (await r.text()).match(/const APP_VERSION\s*=\s*"([0-9.]+)"/);
+      if (!r.ok || !m) throw new Error("no version");
+      if (newer(m[1], APP_VERSION)) {
+        newVersion = m[1];
+        $("#updateText").textContent = `Version ${newVersion} of the Recipe Box is ready.`;
+        $("#updateBanner").hidden = false;
+        if (st) { st.className = "status ok"; st.textContent = `Version ${newVersion} is ready. `; st.append(el("button", { class: "linkbtn", type: "button", text: "Update now", onclick: updateNow })); }
+      } else if (st) { st.className = "status ok"; st.textContent = `You're up to date (version ${APP_VERSION}).`; }
+    } catch (e) {
+      if (st) { st.className = "status err"; st.textContent = "Couldn't check for updates. Are you online?"; }
+    }
+    if (btn) btn.disabled = false;
+  }
+  function maybeCheckUpdate() { if (Date.now() - lastUpdateCheck > 30 * 60000) checkForUpdate(false); }
+  function updateNow() {
+    if (box) leavePresence(box.id);
+    location.replace(location.pathname + "?v=" + encodeURIComponent(newVersion || Date.now()) + location.hash);
+  }
+  $("#updateNowBtn").addEventListener("click", updateNow);
+  $("#updateLaterBtn").addEventListener("click", () => { $("#updateBanner").hidden = true; });
+  setTimeout(() => checkForUpdate(false), 8000);
 })();
 </script>
 </body>
