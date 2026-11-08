@@ -6,7 +6,7 @@ Grandma's cards, Mom's cookbook, and everything we've saved since, in one place 
 
 ## What it does
 
-- **Your own box, plus family boxes.** Everyone gets a private "My recipes" box. Family boxes are shared, and you can be in several. Any recipe can be copied from one box to another, photos included.
+- **Your own box, plus family boxes.** Everyone gets a private "My recipes" box. Family boxes are shared, and you can be in several. Any recipe can be copied from one box to another, photos included. To copy many at once, tap **Select**, pick recipes (or **Select all** after filtering), then **Copy to…**. Recipes already copied there are skipped.
 - **Photograph a paper recipe.** Take a photo of a handwritten card or a cookbook page and the app reads it straight away. It keeps the cook's own wording ("1 stick oleo") and marks unclear words with `[?]`. The photo of the original is saved next to the typed version.
 - **Details filled in for you.** When it reads a recipe, the app also picks a category, suggests tags (main ingredient, course, cuisine, holiday, cooking method, diet), and estimates servings and time if the card doesn't say. Anyone can change these or add their own tags. A typed-in recipe can get the same suggestions with one button.
 - **Paste from Facebook, Pinterest or a website.** The app pulls out just the recipe and leaves out the life story and ads.

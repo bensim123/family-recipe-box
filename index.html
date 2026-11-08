@@ -161,6 +161,15 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
 .taglist { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 14px; }
 .tagchip { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 3px 10px; font-size: .82rem; cursor: pointer; color: var(--muted); }
 .tagchip:hover { color: var(--ink); border-color: var(--muted); }
+.rcard { position: relative; }
+.rcard .pick { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--muted); background: var(--card); color: #fff; display: grid; place-items: center; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,.4); z-index: 1; }
+.rcard[aria-pressed="true"] { outline: 3px solid var(--red); outline-offset: 2px; }
+.rcard[aria-pressed="true"] .pick { background: var(--red); border-color: var(--red); }
+.selbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--card); border-top: 1px solid var(--line); box-shadow: 0 -4px 18px rgba(0,0,0,.15); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+.selbar .in { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.selbar .n { font-weight: 700; margin-right: auto; }
+.selbar .status { flex-basis: 100%; margin: 0; }
+body.selecting { padding-bottom: 140px; }
 .rcard .tagline { color: var(--red); font-size: .8rem; }
 .rcard .byline { font-style: italic; }
 .byline-top { font-size: .95rem; color: var(--ink); margin: 8px 0 0; }
@@ -222,11 +231,13 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
       <input class="search" id="q" type="search" placeholder="Search recipes, ingredients, notes…" aria-label="Search recipes">
       <select class="cat" id="cat" aria-label="Filter by category"></select>
       <span class="count" id="count"></span>
+      <button class="btn" id="selectBtn" type="button">Select</button>
     </div>
     <div class="chips" id="chips" role="group" aria-label="Filter by where it came from" hidden></div>
 
     <p id="boxLoading" class="status">Opening the recipe box…</p>
     <div id="grid" class="grid" hidden></div>
+    <div class="selbar" id="selBar" hidden><div class="in" id="selIn"></div></div>
     <p id="nomatch" class="status" hidden>No recipes match that search.</p>
 
     <section class="cardpanel" id="empty" hidden>
@@ -346,7 +357,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
   const MAX_AI_IMAGES = 3;   // photos the reader looks at in one go
   const MAX_PHOTOS = 6;      // photos kept per recipe
   const TEXT_MODEL   = "openai/gpt-oss-20b";
-  const APP_VERSION  = "1.2";
+  const APP_VERSION  = "1.3";
 
   firebase.initializeApp(FIREBASE_CONFIG);
   const auth = firebase.auth();
@@ -405,6 +416,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
   let recipes = [], memories = [];
   let unsub = [];
   let filterSrc = "all", openId = null, editingId = null;
+  let selecting = false, selected = new Set(), copyingMany = false;
   let editPhotos = [];   // in order: {pid} for saved photos, {data, thumb} for new ones
   const photoCache = new Map();
   let wakeLock = null;
@@ -615,6 +627,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
     const b = boxes.find((x) => x.id === id);
     if (!b) return;
     if (openId) closeRecipe();
+    if (!copyingMany) endSelect();
     if (!keepHash && location.hash.startsWith("#r-")) history.replaceState(null, "", location.pathname + location.search);
     stopListening();
     box = b;
@@ -673,6 +686,66 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
     return "copied";
   }
 
+  // ─── select several recipes and copy them to another box ─────────────────
+  function startSelect() { selecting = true; selected = new Set(); document.body.classList.add("selecting"); renderGrid(); drawSelBar(); }
+  function endSelect() {
+    if (!selecting) return;
+    selecting = false; selected = new Set(); document.body.classList.remove("selecting");
+    $("#selBar").hidden = true; $("#selectBtn").hidden = false;
+    if (box) renderGrid();
+  }
+  $("#selectBtn").addEventListener("click", startSelect);
+  function drawSelBar(picking, msg) {
+    const bar = $("#selBar"), inner = $("#selIn");
+    bar.hidden = !selecting; $("#selectBtn").hidden = selecting;
+    if (!selecting) return;
+    // keep only recipes that still exist
+    for (const id of selected) if (!recipes.some((r) => r.id === id)) selected.delete(id);
+    const shown = recipes.filter(matches);
+    const allShown = shown.length > 0 && shown.every((r) => selected.has(r.id));
+    const n = selected.size;
+    const others = boxes.filter((b) => b.id !== box.id);
+    const status = msg ? el("p", { class: "status " + (msg.cls || ""), "aria-live": "polite", text: msg.text }) : null;
+    if (picking) {
+      fill(inner, el("span", { class: "n", text: `Copy ${n} recipe${n === 1 ? "" : "s"} to:` }),
+        others.map((b) => el("button", { class: "btn primary", type: "button", text: boxLabel(b), onclick: () => copyMany(b) })),
+        el("button", { class: "btn ghost", type: "button", text: "Back", onclick: () => drawSelBar() }),
+        el("small", { style: "flex-basis:100%;color:var(--muted)", text: "Photos come along. Recipes already copied there are skipped." }));
+      return;
+    }
+    fill(inner,
+      el("span", { class: "n", text: n ? `${n} selected` : "Tap recipes to select them" }),
+      shown.length ? el("button", { class: "btn ghost", type: "button", text: allShown ? "Clear" : `Select all ${shown.length === recipes.length ? "" : "shown "}(${shown.length})`,
+        onclick: () => { if (allShown) shown.forEach((r) => selected.delete(r.id)); else shown.forEach((r) => selected.add(r.id)); renderGrid(); } }) : null,
+      others.length
+        ? el("button", { class: "btn primary", type: "button", text: "Copy to…", disabled: !n, onclick: () => drawSelBar(true) })
+        : el("button", { class: "btn", type: "button", text: "+ Start a family box first", onclick: openNewBox }),
+      el("button", { class: "btn ghost", type: "button", text: "Done", onclick: endSelect }),
+      status);
+  }
+  async function copyMany(target) {
+    const list = recipes.filter((r) => selected.has(r.id));
+    if (!list.length) return;
+    copyingMany = true;
+    const inner = $("#selIn");
+    let copied = 0, dup = 0, failed = 0;
+    for (const [i, r] of list.entries()) {
+      fill(inner, el("span", { class: "n", "aria-live": "polite", text: `Copying ${i + 1} of ${list.length} to ${boxLabel(target)}…` }));
+      try { (await copyRecipe(r, target, false)) === "duplicate" ? dup++ : copied++; }
+      catch (e) { console.error(e); failed++; }
+    }
+    copyingMany = false;
+    const parts = copied || !dup
+      ? [`Copied ${copied} recipe${copied === 1 ? "" : "s"} to ${boxLabel(target)}.`]
+      : [`${dup === 1 ? "That recipe was" : `All ${dup} were`} already in ${boxLabel(target)}, so nothing was copied.`];
+    if (dup && copied) parts.push(`${dup} ${dup === 1 ? "was" : "were"} already there.`);
+    if (failed) parts.push(`${failed} couldn't be copied. Check your connection and try those again.`);
+    selected = new Set();
+    renderGrid();
+    drawSelBar(false, { text: parts.join(" "), cls: failed ? "err" : "ok" });
+    toast(parts[0]);
+  }
+
   // ─── filters & grid ────────────────────────────────────────────────────────
   const chips = $("#chips");
   [["all", "Everything"], ...SOURCES].forEach(([k, label]) => {
@@ -709,7 +782,11 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
     $("#count").textContent = has ? (shown.length === recipes.length ? `${recipes.length} recipe${recipes.length === 1 ? "" : "s"}` : `${shown.length} of ${recipes.length}`) : "";
     const grid = $("#grid"); grid.hidden = !shown.length; grid.replaceChildren();
     for (const r of shown) {
-      grid.append(el("button", { class: "rcard", type: "button", onclick: () => openRecipe(r.id) },
+      const on = selected.has(r.id);
+      grid.append(el("button", { class: "rcard", type: "button", "aria-pressed": selecting ? String(on) : null,
+        "aria-label": selecting ? (r.title || "Untitled recipe") : null,
+        onclick: () => { if (!selecting) return openRecipe(r.id); on ? selected.delete(r.id) : selected.add(r.id); renderGrid(); } },
+        selecting ? el("span", { class: "pick", "aria-hidden": "true", text: on ? "✓" : "" }) : null,
         r.thumb ? el("img", { class: "ph", src: r.thumb, alt: "", loading: "lazy" }) : r.photoIds.length ? lazyPhoto(r.photoIds[0]) : null,
         el("div", { class: "body" },
           el("span", { class: "tag", text: SRC[r.source] || "Recipe" }),
@@ -719,6 +796,7 @@ dialog::backdrop { background: rgba(10,14,20,.55); }
           !isPersonal(box) ? el("div", { class: "meta byline", text: "Added by " + nameOf(r.addedBy, r.addedByName) }) : null,
           r.notes ? el("div", { class: "note", text: r.notes }) : null)));
     }
+    if (selecting && !copyingMany) drawSelBar();
   }
 
   // ─── recipe view ───────────────────────────────────────────────────────────
