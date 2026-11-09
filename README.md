@@ -13,6 +13,12 @@ Grandma's cards, Mom's cookbook, and everything we've saved since, in one place 
 - **Type it in** by hand.
 - **Photos on any recipe**: the finished dish, the original card, up to 6. The first one is the picture on the recipe card, and you can pick which one goes first.
 - **Family memories** on every recipe ("Grandma made this every Easter"). In family boxes, every recipe shows who added it.
+- **Favorites:** a heart on any recipe, a ♥ Favorites filter, and a **My favorites** list that spans all your boxes.
+- **Your own views:** Cards, List or Photos layout; sort A to Z, newest, most viewed, recently viewed by you, family favorites, recently made, or not made in a while; filter by several tags at once; group by category, tag, source or who added it. Save any combination as a named view (for example "Christmas baking") and tap it to switch back. Views are private to each person.
+- **Scale & convert:** make ½×, 2× or 3× a recipe, or switch to metric (grams for flour, sugar and butter; ml for liquids). The card's own wording stays under each changed line.
+- **Shopping list:** add a recipe's ingredients with one tap. Matching items from different recipes are added together. Tick things off at the store, or share the list by text. Each person has their own list.
+- **Made it & ratings:** "I made this today", 1–5 stars, and tweaks ("used less sugar"). Family boxes show the family rating and when it was last made.
+- **Cook mode:** one step at a time in big type. It reads each step aloud with the device's own voice (pick the voice and speed), offers timers when a step mentions a time, keeps the screen on, and works hands-free with "next", "back", "repeat", "ingredients", "start timer" and "stop" in browsers that support speech recognition (Chrome, Edge and Safari).
 - Search by name, ingredient, tag or note. Filter by where a recipe came from or by category. Tap a tag to see every recipe with it.
 - Keep the screen on while cooking, and tick off ingredients as you go.
 - **Notifications.** The bell at the top lists what's new in your family boxes: someone joined a box you own, new recipes, and memories shared on recipes you added. In **Your settings**, choose for each one: off, in the app, or in the app plus an alert on this device. You can also mute a box.
@@ -57,14 +63,18 @@ recipeBoxes/{boxId}/photos/{id}     data (JPEG data URL, under 850 KB), by, crea
 recipeBoxes/{boxId}/activity/{id}   type (join | recipe | memory), by, byName, createdAt, and recipeIds/titles/count
                                     or recipeId/title/text/recipeBy
 recipeBoxes/{boxId}/presence/{uid}  name, at, here
-recipeUsers/{uid}                   theme{mode, accent, text, motion}, notify{join, recipe, memory}, muted[], showActive, seenAt
+recipeBoxes/{boxId}/ratings/{recipeId}_{uid}  recipeId, by, byName, stars (0-5), note, made[YYYY-MM-DD], updatedAt
+recipeBoxes/{boxId}/stats/{recipeId}         views (goes up by one), lastViewed
+recipeUsers/{uid}                   theme{mode, accent, text, motion}, notify{join, recipe, memory}, muted[], showActive, seenAt,
+                                    favorites["boxId/recipeId"], recent[], view{layout, sort, group, tags, favOnly, metric},
+                                    savedViews[], shopping[], cook{read, voice, rate, listen}
 ```
 
 Photos are stored in Firestore as compressed JPEGs, so Firebase Storage and the paid Blaze plan aren't needed.
 
 ## Setup (one time)
 
-1. **Add the database rules.** Firebase Console → project `bookshelf-9a848` → Firestore Database → Rules. Paste the contents of [`firestore.recipe-box-addon.rules`](firestore.recipe-box-addon.rules) just above the last two closing braces `}` `}` of the rules that are already there, then click **Publish**. This leaves the live Bookshelf rules untouched. **When the add-on changes** (version 1.4 added notifications, presence and personal settings), delete the old block, from its `FAMILY RECIPE BOX: ADD-ON` line down to just above the last two closing braces, and paste the new one in its place. ([`firestore.rules`](firestore.rules) shows the complete combined file, but its Bookshelf half is copied from Bookshelf's DEPLOY_README and may be older than what's live.)
+1. **Add the database rules.** Firebase Console → project `bookshelf-9a848` → Firestore Database → Rules. Paste the contents of [`firestore.recipe-box-addon.rules`](firestore.recipe-box-addon.rules) just above the last two closing braces `}` `}` of the rules that are already there, then click **Publish**. This leaves the live Bookshelf rules untouched. **When the add-on changes** (1.4 added notifications, presence and settings; 1.5 added ratings and view counts), delete the old block, from its `FAMILY RECIPE BOX: ADD-ON` line down to just above the last two closing braces, and paste the new one in its place. ([`firestore.rules`](firestore.rules) shows the complete combined file, but its Bookshelf half is copied from Bookshelf's DEPLOY_README and may be older than what's live.)
 2. **Microsoft sign-in** works only if it is already turned on for Bookshelf. Nothing else changes in Firebase. `bensim123.github.io` is already an authorized domain, and the Cloudflare Worker already accepts requests from it.
 3. **Turn on GitHub Pages** for this repository: branch `main`, folder `/` (root).
 
@@ -72,6 +82,7 @@ Photos are stored in Firestore as compressed JPEGs, so Firebase Storage and the 
 
 - Alerts on your device only work while the app is open, including in a background tab or app. Alerts when the app is fully closed (push notifications or email) need a server, which this setup doesn't have yet. On iPhone, alerts need the app added to the Home Screen.
 - The Cloudflare Worker allows one AI request per person every 30 seconds, shared with Bookshelf.
+- Hands-free voice commands need a browser with speech recognition and microphone permission. Reading aloud works everywhere.
 - A recipe holds up to 6 photos. The reader looks at up to 3 new photos at a time.
 - Handwriting reading is good but not perfect. Always read the result over before saving.
 

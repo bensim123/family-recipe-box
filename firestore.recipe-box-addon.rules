@@ -109,6 +109,32 @@
         allow delete: if rbIsMember(boxId) && (resource.data.by == request.auth.uid || rbIsOwner(boxId));
       }
 
+      // Ratings, tweaks and "I made this": one record per person per recipe (id: <recipeId>_<uid>).
+      match /ratings/{ratingId} {
+        allow read: if rbIsMember(boxId);
+        allow create, update: if rbIsMember(boxId)
+          && request.resource.data.by == request.auth.uid
+          && ratingId == request.resource.data.recipeId + '_' + request.auth.uid
+          && request.resource.data.keys().hasOnly(['recipeId', 'by', 'byName', 'stars', 'note', 'made', 'updatedAt'])
+          && request.resource.data.get('stars', 0) is int
+          && request.resource.data.get('stars', 0) >= 0 && request.resource.data.get('stars', 0) <= 5
+          && request.resource.data.get('note', '') is string && request.resource.data.get('note', '').size() <= 1000
+          && request.resource.data.get('made', []) is list && request.resource.data.get('made', []).size() <= 200;
+        allow delete: if rbIsMember(boxId) && (resource.data.by == request.auth.uid || rbIsOwner(boxId));
+      }
+
+      // How many times each recipe has been opened. It can only go up by one at a time.
+      match /stats/{recipeId} {
+        allow read: if rbIsMember(boxId);
+        allow create: if rbIsMember(boxId)
+          && request.resource.data.keys().hasOnly(['views', 'lastViewed'])
+          && request.resource.data.views == 1 && request.resource.data.lastViewed == request.time;
+        allow update: if rbIsMember(boxId)
+          && request.resource.data.keys().hasOnly(['views', 'lastViewed'])
+          && request.resource.data.views == resource.data.views + 1 && request.resource.data.lastViewed == request.time;
+        allow delete: if rbIsOwner(boxId);
+      }
+
       // Who's here now: one small record per person, refreshed while the app is open.
       match /presence/{uid} {
         allow read: if rbIsMember(boxId);

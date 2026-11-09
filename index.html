@@ -112,7 +112,7 @@ select.cat { padding: 9px 12px; border: 1px solid var(--line); border-radius: 8p
 .rcard:hover { transform: translateY(-2px) rotate(-.3deg); }
 .rcard .ph { aspect-ratio: 4 / 3; width: 100%; object-fit: cover; display: block; background: var(--rule); }
 .rcard .body { padding: 14px 16px 16px; border-top: 3px solid var(--red); background-image: repeating-linear-gradient(to bottom, transparent 0 27px, var(--rule) 27px 28px); background-position: 0 40px; min-height: 150px; display: flex; flex-direction: column; gap: 6px; }
-.rcard h3 { font-size: 1.25rem; line-height: 1.2; }
+.rcard h3, .rcard h4 { font-size: 1.25rem; line-height: 1.2; font-family: var(--display); font-weight: 400; margin: 0; }
 .rcard .meta { font-size: .85rem; color: var(--muted); }
 .rcard .note { font-family: var(--hand); font-size: 1.4rem; line-height: 28px; color: var(--muted); margin-top: auto; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tag { display: inline-block; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; color: var(--red); }
@@ -246,6 +246,99 @@ body.selecting { padding-bottom: 140px; }
 .prefs .hint { font-size: .85rem; color: var(--muted); margin: 4px 0 12px; }
 .update-banner { position: fixed; left: 50%; transform: translateX(-50%); top: calc(10px + env(safe-area-inset-top, 0px)); z-index: 75; background: var(--ink); color: var(--paper); padding: 8px 8px 8px 16px; border-radius: 10px; display: flex; gap: 12px; align-items: center; box-shadow: var(--shadow); max-width: calc(100vw - 24px); }
 .update-banner .btn { min-height: 38px; padding: 6px 12px; background: var(--paper); color: var(--ink); border: 0; }
+.layouts { display: flex; gap: 6px; }
+.layouts .chip { min-height: 44px; }
+.chip.fav[aria-pressed="true"] { background: var(--red); border-color: var(--red); color: var(--on-red); }
+.rcard .statline { color: var(--ink); font-size: .85rem; }
+.rcard .noph { aspect-ratio: 4 / 3; display: none; place-items: center; background: var(--red-soft); color: var(--red); font-family: var(--display); font-size: 2.4rem; }
+.grid.layout-list { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.grid.layout-list .rcard { flex-direction: row; align-items: stretch; }
+.grid.layout-list .rcard .ph { width: 92px; height: auto; aspect-ratio: auto; flex: none; }
+.grid.layout-list .rcard .body { min-height: 0; border-top: 0; border-left: 3px solid var(--red); background-image: none; padding: 10px 14px; gap: 2px; flex: 1; min-width: 0; }
+.grid.layout-list .rcard .note, .grid.layout-list .rcard .tagline, .grid.layout-list .rcard .byline { display: none; }
+.grid.layout-list .rcard h3, .grid.layout-list .rcard h4 { font-size: 1.12rem; }
+.grid.layout-list .rcard .pick { top: 50%; transform: translateY(-50%); }
+.grid.layout-tiles { grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
+.grid.layout-tiles .rcard .noph { display: grid; }
+.grid.layout-tiles .rcard .body { min-height: 0; background-image: none; padding: 10px 12px; gap: 2px; }
+.grid.layout-tiles .rcard .meta:not(.statline), .grid.layout-tiles .rcard .note, .grid.layout-tiles .rcard .tag { display: none; }
+.grid.layout-tiles .rcard h3, .grid.layout-tiles .rcard h4 { font-size: 1.02rem; }
+.titleacts { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+.btn.on { border-color: var(--red); color: var(--red); font-weight: 700; }
+.scalebar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0 0 10px; font-size: .92rem; }
+.scalebar .chip { min-height: 40px; min-width: 48px; }
+.scalebar label { display: inline-flex; gap: 6px; align-items: center; margin-left: 6px; cursor: pointer; min-height: 40px; }
+.scalebar input { width: 18px; height: 18px; accent-color: var(--red); }
+.ings .was { display: block; color: var(--muted); font-size: .82rem; text-decoration: none; }
+.rate { display: grid; gap: 10px; }
+.stars { display: flex; gap: 2px; align-items: center; flex-wrap: wrap; }
+.stars button { border: 0; background: none; font-size: 1.9rem; line-height: 1; padding: 4px; min-width: 44px; min-height: 44px; cursor: pointer; color: var(--muted); }
+.stars button[data-on="true"] { color: var(--red); }
+.tweaks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.tweaks li { border-left: 3px solid var(--rule); padding: 2px 0 2px 12px; }
+.tweaks .who { font-size: .82rem; color: var(--muted); }
+.shop { list-style: none; padding: 0; margin: 0; display: grid; }
+.shop li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.shop input[type=checkbox] { width: 22px; height: 22px; flex: none; accent-color: var(--green); margin-top: 2px; }
+.shop label { flex: 1; cursor: pointer; }
+.shop .from { display: block; font-size: .8rem; color: var(--muted); }
+.shop input:checked + label .it { text-decoration: line-through; color: var(--muted); }
+.shop .x { border: 0; background: none; color: var(--muted); cursor: pointer; min-width: 44px; min-height: 44px; font-size: 1.2rem; }
+.favlist { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.favlist button { width: 100%; display: flex; gap: 12px; align-items: center; text-align: left; border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 8px; cursor: pointer; min-height: 64px; }
+.favlist img, .favlist .noimg { width: 56px; height: 56px; object-fit: cover; border-radius: 4px; flex: none; background: var(--red-soft); color: var(--red); display: grid; place-items: center; font-family: var(--display); font-size: 1.4rem; }
+.favlist .where { display: block; font-size: .82rem; color: var(--muted); }
+.savedviews { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 16px; }
+.savedviews .lbl { font-weight: 700; font-size: .9rem; }
+.savedviews .sv { display: inline-flex; align-items: center; }
+.savedviews .sv .chip { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.savedviews .svx { border: 1px solid var(--line); border-left: 0; background: transparent; border-radius: 0 999px 999px 0; min-height: 36px; min-width: 36px; cursor: pointer; color: var(--muted); }
+.savedviews .svform { display: flex; flex-wrap: wrap; gap: 6px; }
+.savedviews .svform input { padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); min-width: 0; flex: 1 1 200px; }
+.tagpick { position: relative; }
+.tagpick summary { list-style: none; display: inline-flex; align-items: center; }
+.tagpick summary::-webkit-details-marker { display: none; }
+.tagpick summary::after { content: " ▾"; margin-left: 4px; }
+.tagpick summary[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.tagbox { position: absolute; z-index: 15; top: calc(100% + 6px); left: 0; width: min(320px, calc(100vw - 32px)); max-height: 320px; overflow: auto; background: var(--card); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); padding: 10px 12px; display: grid; gap: 2px; }
+.tagopt { display: flex; gap: 8px; align-items: center; min-height: 40px; cursor: pointer; }
+.tagopt input { width: 18px; height: 18px; accent-color: var(--red); }
+.groups { display: grid; gap: 8px; }
+.groups > h3.grouph { font-size: 1.3rem; margin: 18px 0 4px; display: flex; gap: 8px; align-items: baseline; }
+.groups > h3.grouph small { font-family: var(--body); font-size: .85rem; color: var(--muted); }
+dialog.cook { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; }
+.cooksheet { background: var(--card); min-height: 100%; height: 100%; display: flex; flex-direction: column; padding: calc(14px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); border-top: 6px solid var(--red); }
+.cookhead { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.cookhead h2 { font-size: clamp(1.2rem, 3vw, 1.6rem); }
+.cookhead .prog { color: var(--muted); font-size: .95rem; }
+.cookbar { height: 6px; background: var(--rule); border-radius: 3px; margin: 10px 0 0; overflow: hidden; }
+.cookbar span { display: block; height: 100%; background: var(--red); }
+.cookbody { flex: 1; overflow: auto; display: flex; flex-direction: column; justify-content: center; max-width: 900px; width: 100%; margin: 0 auto; padding: 18px 0; }
+.cookstep { font-size: clamp(1.5rem, 4.4vw, 2.4rem); line-height: 1.35; margin: 0; }
+.cookbody .label { font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--red); margin-bottom: 10px; }
+.cookbody .ings label { font-size: clamp(1.1rem, 3vw, 1.4rem); }
+.cooktools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+.cooknav { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.cooknav .btn { min-height: 64px; font-size: 1.2rem; }
+.timers { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
+.timer { display: inline-flex; gap: 8px; align-items: center; background: var(--red-soft); border-radius: 999px; padding: 6px 6px 6px 14px; font-variant-numeric: tabular-nums; font-weight: 700; }
+.timer.done { background: var(--red); color: var(--on-red); }
+.timer button { border: 0; background: var(--card); color: var(--ink); border-radius: 999px; min-height: 36px; padding: 0 12px; cursor: pointer; }
+.heard { min-height: 1.4em; text-align: center; font-size: .9rem; color: var(--muted); margin: 6px 0 0; }
+.voiceprefs { margin-top: 8px; }
+.voiceprefs summary { cursor: pointer; text-align: center; color: var(--muted); font-size: .92rem; min-height: 32px; }
+.voiceprefs .row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 8px; }
+.voiceprefs select { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); min-height: 44px; max-width: 100%; }
+@media (max-width: 640px) {
+  .tools { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding-block: 12px; }
+  .tools .search { grid-column: 1 / -1; }
+  .tools select.cat { width: 100%; min-width: 0; }
+  .tools .layouts { grid-column: 1 / -1; }
+  .tools .layouts .chip { flex: 1; }
+  .tools .count { align-self: center; }
+  .tools #selectBtn { justify-self: end; }
+  .savedviews { padding-top: 12px; }
+}
 .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; cursor: zoom-out; }
 .lightbox img { max-height: 100%; max-width: 100%; object-fit: contain; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 8px; z-index: 70; box-shadow: var(--shadow); max-width: calc(100vw - 32px); }
@@ -290,6 +383,13 @@ body.selecting { padding-bottom: 140px; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
           <span class="badge" id="bellCount" aria-hidden="true" hidden></span>
         </button>
+        <button class="btn iconbtn" id="favBtn" type="button" aria-label="My favorites" title="My favorites">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        </button>
+        <button class="btn iconbtn" id="shopBtn" type="button" aria-label="Shopping list" title="Shopping list">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"/></svg>
+          <span class="badge" id="shopCount" aria-hidden="true" hidden></span>
+        </button>
         <button class="btn" id="meBtn" type="button">Your settings</button>
       </div>
     </div>
@@ -307,9 +407,13 @@ body.selecting { padding-bottom: 140px; }
 
     <section id="main" tabindex="-1" aria-labelledby="recipesH">
     <h2 class="sr-only" id="recipesH">Recipes</h2>
+    <div class="savedviews" id="savedViews" role="group" aria-label="My saved views" hidden></div>
     <div class="tools" id="tools" hidden>
       <input class="search" id="q" type="search" placeholder="Search recipes, ingredients, notes…" aria-label="Search recipes">
       <select class="cat" id="cat" aria-label="Filter by category"></select>
+      <select class="cat" id="sortSel" aria-label="Sort recipes"></select>
+      <select class="cat" id="groupSel" aria-label="Group recipes"></select>
+      <div class="layouts" role="group" aria-label="Layout" id="layoutBtns"></div>
       <span class="count" id="count"></span>
       <button class="btn" id="selectBtn" type="button">Select</button>
     </div>
@@ -427,6 +531,20 @@ body.selecting { padding-bottom: 140px; }
   <p style="margin-top:16px"><button class="linkbtn" type="button" id="notifPrefsBtn">Choose what you're notified about</button></p>
 </div></dialog>
 
+<!-- My favorites, across every box -->
+<dialog id="favDlg" class="narrow" aria-labelledby="favTitle"><div class="sheet">
+  <button class="close" type="button" data-close aria-label="Close">×</button>
+  <h2 id="favTitle">My favorites</h2>
+  <p class="status" id="favStatus" aria-live="polite"></p>
+  <ul class="favlist" id="favList"></ul>
+</div></dialog>
+
+<!-- Shopping list -->
+<dialog id="shopDlg" class="narrow" aria-labelledby="shopTitle"><div class="sheet" id="shopSheet"></div></dialog>
+
+<!-- Cook mode: one step at a time, read aloud -->
+<dialog id="cookDlg" class="cook" aria-labelledby="cookTitle"><div class="cooksheet" id="cookSheet"></div></dialog>
+
 <!-- Your settings -->
 <dialog id="meDlg" class="narrow" aria-labelledby="meTitle"><div class="sheet prefs" id="meSheet"></div></dialog>
 
@@ -450,7 +568,7 @@ body.selecting { padding-bottom: 140px; }
   const MAX_AI_IMAGES = 3;   // photos the reader looks at in one go
   const MAX_PHOTOS = 6;      // photos kept per recipe
   const TEXT_MODEL   = "openai/gpt-oss-20b";
-  const APP_VERSION  = "1.4";
+  const APP_VERSION  = "1.5";
 
   firebase.initializeApp(FIREBASE_CONFIG);
   const auth = firebase.auth();
@@ -486,6 +604,7 @@ body.selecting { padding-bottom: 140px; }
   const fill = (node, ...kids) => node.replaceChildren(...kids.flat(Infinity).filter((c) => c != null && c !== false));
   const str = (v, max = 6000) => (typeof v === "string" ? v : v == null ? "" : String(v)).slice(0, max);
   const list = (v) => Array.isArray(v) ? v.map((x) => str(x, 1000).trim()).filter(Boolean).slice(0, 200) : [];
+  const initialOf = (t) => ((String(t || "").match(/[\p{L}\p{N}]/u) || ["?"])[0]).toUpperCase();
   const safeImg = (u) => typeof u === "string" && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(u) ? u : null;
   const safeHref = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; } };
   const lsGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
@@ -739,6 +858,8 @@ body.selecting { padding-bottom: 140px; }
     $("#grid").hidden = true; $("#empty").hidden = true; $("#tools").hidden = true; $("#chips").hidden = true; $("#nomatch").hidden = true;
     const ref = fs.doc("recipeBoxes/" + id);
     watchPresence(ref);
+    watchKitchen(ref);
+    recipesReady = false;
     let firstRecipes = true;
     const slow = setTimeout(() => { if (firstRecipes) $("#boxLoading").textContent = "Still opening… if this doesn't finish, check your connection and reload."; }, 10000);
 
@@ -753,6 +874,7 @@ body.selecting { padding-bottom: 140px; }
           tags: cleanTags(v.tags), thumb: safeImg(v.thumb), addedBy: str(v.addedBy, 200), addedByName: str(v.addedByName, 100), createdAt: v.createdAt,
           copiedFrom: cf ? { boxId: str(cf.boxId, 100), recipeId: str(cf.recipeId, 100), boxName: str(cf.boxName, 100), addedByName: str(cf.addedByName, 100) } : null };
       }).sort((a, b) => a.title.localeCompare(b.title));
+      recipesReady = true;
       renderGrid();
       if (openId && !document.activeElement?.closest?.(".memform")) renderDetail();
       if (firstRecipes) { firstRecipes = false; fromHash(); }
@@ -853,17 +975,21 @@ body.selecting { padding-bottom: 140px; }
   const chips = $("#chips");
   [["all", "Everything"], ...SOURCES].forEach(([k, label]) => {
     chips.append(el("button", { class: "chip", type: "button", "aria-pressed": String(k === "all"), "data-k": k, text: label,
-      onclick: () => { filterSrc = k; chips.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.k === k))); renderGrid(); } }));
+      onclick: () => { filterSrc = k; chips.querySelectorAll(".chip[data-k]").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.k === k))); renderGrid(); } }));
   });
   const catSel = $("#cat");
   catSel.append(el("option", { value: "", text: "All categories" }), ...CATS.map((c) => el("option", { value: c, text: c })));
   catSel.addEventListener("change", renderGrid);
   $("#q").addEventListener("input", renderGrid);
+  let recipesReady = false;
+  const renderGridIfReady = () => { if (box && recipesReady) renderGrid(); };
   $("#fSource").append(...SOURCES.map(([k, l]) => el("option", { value: k, text: l })));
   $("#fCategory").append(el("option", { value: "", text: "Pick one…" }), ...CATS.map((c) => el("option", { value: c, text: c })));
 
   function matches(r) {
     if (filterSrc !== "all" && r.source !== filterSrc) return false;
+    if (prefs.view.favOnly && !isFav(r.id)) return false;
+    if (prefs.view.tags.length && !prefs.view.tags.every((t) => r.tags.includes(t))) return false;
     if (catSel.value && r.category !== catSel.value) return false;
     const q = $("#q").value.trim().toLowerCase();
     if (!q) return true;
@@ -879,34 +1005,49 @@ body.selecting { padding-bottom: 140px; }
     $("#boxLoading").hidden = true;
     const has = recipes.length > 0;
     $("#empty").hidden = has;
-    $("#tools").hidden = !has; $("#chips").hidden = !has;
-    const shown = recipes.filter(matches);
+    $("#tools").hidden = !has; $("#chips").hidden = !has; $("#savedViews").hidden = !has;
+    const shown = sortRecipes(recipes.filter(matches));
     $("#nomatch").hidden = !has || shown.length > 0;
     $("#count").textContent = has ? (shown.length === recipes.length ? `${recipes.length} recipe${recipes.length === 1 ? "" : "s"}` : `${shown.length} of ${recipes.length}`) : "";
     const grid = $("#grid"); grid.hidden = !shown.length; grid.replaceChildren();
-    for (const r of shown) {
+    const lay = "grid layout-" + prefs.view.layout;
+    const sets = prefs.view.group === "none" ? [["", shown]] : grouped(shown);
+    grid.className = prefs.view.group === "none" ? lay : "groups";
+    const hTag = prefs.view.group === "none" ? "h3" : "h4";
+    for (const [gname, rows] of sets) {
+    let into = grid;
+    if (gname) { grid.append(el("h3", { class: "grouph" }, gname, el("small", { text: `${rows.length}` }))); into = el("div", { class: lay }); grid.append(into); }
+    for (const r of rows) {
       const on = selected.has(r.id);
-      grid.append(el("button", { class: "rcard", type: "button", "aria-pressed": selecting ? String(on) : null,
+      into.append(el("button", { class: "rcard", type: "button", "aria-pressed": selecting ? String(on) : null,
         "aria-label": selecting ? (r.title || "Untitled recipe") : null,
         onclick: () => { if (!selecting) return openRecipe(r.id); on ? selected.delete(r.id) : selected.add(r.id); renderGrid(); } },
         selecting ? el("span", { class: "pick", "aria-hidden": "true", text: on ? "✓" : "" }) : null,
-        r.thumb ? el("img", { class: "ph", src: r.thumb, alt: "", loading: "lazy" }) : r.photoIds.length ? lazyPhoto(r.photoIds[0]) : null,
+        r.thumb ? el("img", { class: "ph", src: r.thumb, alt: "", loading: "lazy" }) : r.photoIds.length ? lazyPhoto(r.photoIds[0]) : el("span", { class: "noph", "aria-hidden": "true", text: initialOf(r.title) }),
         el("div", { class: "body" },
           el("span", { class: "tag", text: SRC[r.source] || "Recipe" }),
-          el("h3", { text: r.title || "Untitled recipe" }),
+          el(hTag, { text: r.title || "Untitled recipe" }),
+          statLine(r),
           el("div", { class: "meta", text: [r.category, r.sourceDetail].filter(Boolean).join(" · ") }),
           r.tags.length ? el("div", { class: "meta tagline", text: r.tags.slice(0, 4).map((t) => "#" + t).join("  ") }) : null,
           !isPersonal(box) ? el("div", { class: "meta byline", text: "Added by " + nameOf(r.addedBy, r.addedByName) }) : null,
           r.notes ? el("div", { class: "note", text: r.notes }) : null)));
     }
+    }
+    drawTagPicker(); drawSavedViews();
     if (selecting && !copyingMany) drawSelBar();
   }
 
   // ─── recipe view ───────────────────────────────────────────────────────────
   const viewDlg = $("#viewDlg");
+  let scale = 1;
+  const ticked = new Set();
   function openRecipe(id, fromHashChange) {
-    if (!recipes.some((x) => x.id === id)) return;
+    const rec = recipes.find((x) => x.id === id);
+    if (!rec) return;
+    if (openId !== id) { scale = 1; ticked.clear(); }
     openId = id;
+    noteView(rec);
     const h = "#r-" + box.id + "." + id;
     if (!fromHashChange && location.hash !== h) history.replaceState(null, "", h);
     renderDetail();
@@ -973,6 +1114,7 @@ body.selecting { padding-bottom: 140px; }
     const actions = el("div", { class: "actions" });
     const drawActions = () => {
       fill(actions,
+        el("button", { class: "btn primary", type: "button", text: "Start cooking", onclick: () => startCook(r) }),
         el("button", { class: "btn", type: "button", text: "Edit", onclick: () => { closeRecipe(); openEditor(r); } }),
         "wakeLock" in navigator ? el("button", { class: "btn", type: "button", text: wakeLock ? "Screen stays on ✓" : "Keep screen on while cooking", onclick: toggleWake }) : null,
         others.length ? el("button", { class: "btn", type: "button", text: isPersonal(box) ? "Copy to a family box…" : "Copy to…", onclick: drawCopy }) : null,
@@ -1029,6 +1171,9 @@ body.selecting { padding-bottom: 140px; }
         el("div", {},
           el("span", { class: "tag", text: SRC[r.source] || "Recipe" }),
           el("h2", { id: "vTitle", text: r.title || "Untitled recipe" }),
+          el("div", { class: "titleacts" },
+            el("button", { class: "btn" + (isFav(r.id) ? " on" : ""), type: "button", "aria-pressed": String(isFav(r.id)),
+              text: isFav(r.id) ? "♥ Favorite" : "♡ Add to favorites", onclick: () => toggleFav(r) })),
           !isPersonal(box) ? el("p", { class: "byline-top", text: `Added by ${nameOf(r.addedBy, r.addedByName)}${fmtDate(r.createdAt) ? " · " + fmtDate(r.createdAt) : ""}` }) : null,
           el("div", { class: "facts" },
             r.sourceDetail ? el("span", { text: r.sourceDetail }) : null,
@@ -1037,11 +1182,11 @@ body.selecting { padding-bottom: 140px; }
             r.time ? el("span", { text: r.time }) : null,
             link ? el("a", { href: link, target: "_blank", rel: "noopener", text: "Original link ↗" }) : null),
           r.tags.length ? el("div", { class: "taglist" }, ...r.tags.map((t) => el("button", { class: "tagchip", type: "button", text: "#" + t, title: "Show every recipe tagged " + t,
-            onclick: () => { closeRecipe(); $("#q").value = t; renderGrid(); } }))) : null,
-          r.ingredients.length ? [el("div", { class: "section-label", text: "Ingredients" }),
-            el("ul", { class: "ings" }, ...r.ingredients.map((g, i) => el("li", {}, el("label", {}, el("input", { type: "checkbox", id: `ing-${i}` }), el("span", { text: g })))))] : null,
+            onclick: () => { closeRecipe(); setView({ tags: [t] }); toast(`Showing recipes tagged #${t}`); } }))) : null,
+          r.ingredients.length ? ingredientsBlock(r) : null,
           r.steps.length ? [el("div", { class: "section-label", text: "Directions" }), el("ol", { class: "steps" }, ...r.steps.map((s) => el("li", { text: s })))] : null,
           r.notes ? [el("div", { class: "section-label", text: "Notes" }), el("div", { class: "handnote", text: r.notes })] : null,
+          ratingSection(r),
           el("div", { class: "section-label", text: isPersonal(box) ? "Memories" : "Family memories" }),
           el("div", { class: "mem" },
             mems.length ? mems.map((m) => el("div", { class: "m" }, el("div", { text: m.text }),
@@ -1053,6 +1198,27 @@ body.selecting { padding-bottom: 140px; }
             (r.copiedFrom ? ` · copied from ${r.copiedFrom.boxName || "another box"}${r.copiedFrom.addedByName && r.copiedFrom.addedByName !== r.addedByName ? ", where " + r.copiedFrom.addedByName + " added it" : ""}` : "")),
           actions)));
   }
+  function ingredientsBlock(r) {
+    const metric = prefs.view.metric;
+    const lines = r.ingredients.map((g) => convertLine(g, scale, metric));
+    const factors = [[0.5, "½×"], [1, "1×"], [2, "2×"], [3, "3×"]];
+    return [
+      el("div", { class: "section-label", text: "Ingredients" }),
+      el("div", { class: "scalebar", role: "group", "aria-label": "Recipe size and units" },
+        el("span", { text: "Make:" }),
+        factors.map(([f, l]) => el("button", { class: "chip", type: "button", "aria-pressed": String(scale === f), "aria-label": f === 1 ? "As written" : `${l.replace("×", "")} times the recipe`, text: l,
+          onclick: () => { scale = f; renderDetail(); } })),
+        el("label", {}, el("input", { type: "checkbox", checked: metric, onchange: (e) => { prefs.view = { ...prefs.view, metric: e.target.checked }; savePrefs({ view: prefs.view }); renderDetail(); } }), "Metric")),
+      scale !== 1 || metric ? el("p", { class: "status", style: "margin:0 0 6px", text: `Showing ${scale === 1 ? "the recipe as written" : factors.find((x) => x[0] === scale)[1] + " the recipe"}${metric ? " in metric" : ""}. Amounts are rounded; the card's own wording is under each line.` }) : null,
+      el("ul", { class: "ings" }, lines.map((c, i) => el("li", {}, el("label", {},
+        el("input", { type: "checkbox", id: `ing-${i}`, checked: ticked.has(i), onchange: (e) => { e.target.checked ? ticked.add(i) : ticked.delete(i); } }),
+        el("span", {}, c.text, c.changed ? el("small", { class: "was", text: "Card says: " + r.ingredients[i] }) : null))))),
+      el("div", { style: "margin-top:10px" }, el("button", { class: "btn", type: "button", text: "Add the ingredients to my shopping list", onclick: () => {
+        const n = addToShopping(lines.map((c) => ({ qty: c.qty, unit: c.unit, tok: c.tok, name: c.name, metric: !!c.metric })), r.title);
+        toast(`Added ${n} item${n === 1 ? "" : "s"} to your shopping list`);
+      } })),
+    ];
+  }
   function releaseWake() { try { wakeLock && wakeLock.release(); } catch {} wakeLock = null; }
 
   async function deleteRecipe(r) {
@@ -1063,6 +1229,8 @@ body.selecting { padding-bottom: 140px; }
       for (const m of memories.filter((m) => m.recipeId === r.id && (m.by === me.uid || isOwner()))) batch.delete(ref.collection("memories").doc(m.id));
       await batch.commit();
       for (const pid of r.photoIds) ref.collection("photos").doc(pid).delete().catch(() => {});
+      ref.collection("ratings").doc(`${r.id}_${me.uid}`).delete().catch(() => {});
+      if (isOwner()) { ref.collection("stats").doc(r.id).delete().catch(() => {}); for (const x of famInfo(r.id).rs) ref.collection("ratings").doc(`${r.id}_${x.by}`).delete().catch(() => {}); }
       closeRecipe(); toast("Recipe deleted");
     } catch { toast("Couldn't delete it. Only the person who added it, or the box owner, can."); }
   }
@@ -1463,7 +1631,10 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
     for (const [k] of EVENTS) out[k] = pick(n[k], LEVELS, NOTIFY_DEFAULT[k]);
     return out;
   }
-  let prefs = { theme: cleanTheme((() => { try { return JSON.parse(lsGet("rb_theme") || "{}"); } catch { return {}; } })()), notify: { ...NOTIFY_DEFAULT }, muted: [], showActive: true, seenAt: null };
+  let prefs = { theme: cleanTheme((() => { try { return JSON.parse(lsGet("rb_theme") || "{}"); } catch { return {}; } })()), notify: { ...NOTIFY_DEFAULT }, muted: [], showActive: true, seenAt: null,
+    favorites: [], recent: [], shopping: [], savedViews: [],
+    view: { layout: "cards", sort: "az", favOnly: false, metric: false, group: "none", tags: [] },
+    cook: { read: true, voice: "", rate: 1, listen: false } };
   let prefsUnsub = null, prefsLoaded = false;
   const prefsRef = () => fs.doc("recipeUsers/" + me.uid);
 
@@ -1488,7 +1659,16 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
       prefs.muted = Array.isArray(v.muted) ? v.muted.filter((x) => typeof x === "string") : [];
       prefs.showActive = v.showActive !== false;
       if (v.seenAt && typeof v.seenAt.toDate === "function") prefs.seenAt = v.seenAt;
+      prefs.favorites = Array.isArray(v.favorites) ? v.favorites.filter((x) => typeof x === "string").slice(0, 500) : [];
+      prefs.recent = Array.isArray(v.recent) ? v.recent.filter((x) => typeof x === "string").slice(0, 30) : [];
+      prefs.view = cleanView(v.view);
+      prefs.shopping = cleanShopping(v.shopping);
+      prefs.savedViews = cleanSaved(v.savedViews);
+      const c = v.cook && typeof v.cook === "object" ? v.cook : {};
+      prefs.cook = { read: c.read !== false, voice: str(c.voice, 200), rate: [0.8, 1, 1.2].includes(c.rate) ? c.rate : 1, listen: c.listen === true };
       prefsLoaded = true;
+      drawViewControls(); drawShopBadge(); renderGridIfReady();
+      if (shopDlg.open && !shopDlg.contains(document.activeElement)) drawShopping();
       syncActivity(); drawBell();
       if ($("#meDlg").open && !$("#meDlg").contains(document.activeElement)) drawMe();
     }, (e) => console.error(e));
@@ -1770,6 +1950,593 @@ ${JSON.stringify({ title, ingredients: $("#fIngredients").value, directions: $("
     if (!others.length) return;
     const list = others.length <= 3 ? others.join(others.length === 2 ? " and " : ", ") : `${others.slice(0, 2).join(", ")} and ${others.length - 2} more`;
     fill(n, el("span", { class: "dot", "aria-hidden": "true" }), el("span", { text: `Here now: ${list}` }));
+  }
+
+
+  // ─── measurements: read "1 ½ c. flour", scale it, convert it ──────────────
+  const FRAC = { "½": 1 / 2, "¼": 1 / 4, "¾": 3 / 4, "⅓": 1 / 3, "⅔": 2 / 3, "⅛": 1 / 8, "⅜": 3 / 8, "⅝": 5 / 8, "⅞": 7 / 8 };
+  const FR = "[½¼¾⅓⅔⅛⅜⅝⅞]";
+  const NUM = `(?:\\d+\\s+\\d+\\/\\d+|\\d+\\/\\d+|\\d+(?:\\.\\d+)?\\s*${FR}|\\d+(?:\\.\\d+)?|${FR})`;
+  const QRE = new RegExp(`^\\s*(${NUM})(?:\\s*(?:-|–|to)\\s*(${NUM}))?(?![\\d/])`);
+  function num(s) {
+    s = s.trim();
+    let m;
+    if ((m = s.match(/^(\d+)\s+(\d+)\/(\d+)$/))) return +m[1] + (+m[3] ? +m[2] / +m[3] : 0);
+    if ((m = s.match(/^(\d+)\/(\d+)$/))) return +m[2] ? +m[1] / +m[2] : 0;
+    if ((m = s.match(new RegExp(`^(\\d+(?:\\.\\d+)?)\\s*(${FR})$`)))) return +m[1] + FRAC[m[2]];
+    if (FRAC[s] != null) return FRAC[s];
+    return parseFloat(s) || 0;
+  }
+  // Canonical unit -> the ways cards write it. "T." is a tablespoon and "t." a teaspoon, so case matters.
+  const UNITS = {
+    cup: ["c", "c.", "C", "C.", "cup", "cups", "Cup", "Cups"],
+    tbsp: ["T", "T.", "Tbsp", "Tbsp.", "tbsp", "tbsp.", "TBSP", "Tbs", "Tbs.", "tbs", "tbs.", "tablespoon", "tablespoons", "Tablespoon", "Tablespoons"],
+    tsp: ["t", "t.", "tsp", "tsp.", "Tsp", "Tsp.", "teaspoon", "teaspoons", "Teaspoon", "Teaspoons"],
+    oz: ["oz", "oz.", "Oz", "Oz.", "ounce", "ounces"], lb: ["lb", "lb.", "lbs", "lbs.", "Lb", "Lbs", "pound", "pounds"],
+    pint: ["pt", "pt.", "pint", "pints"], quart: ["qt", "qt.", "quart", "quarts"], stick: ["stick", "sticks"],
+    can: ["can", "cans"], pkg: ["pkg", "pkg.", "pkgs", "package", "packages"], g: ["g", "gram", "grams"], kg: ["kg"],
+    ml: ["ml", "mL"], l: ["l", "L", "liter", "liters", "litre", "litres"], dozen: ["doz", "doz.", "dozen"],
+  };
+  const UNIT_OF = {};
+  for (const [k, list] of Object.entries(UNITS)) for (const w of list) UNIT_OF[w] = k;
+  const WORDY = { cup: 1, tablespoon: 1, teaspoon: 1, ounce: 1, pound: 1, pint: 1, quart: 1, stick: 1, can: 1, package: 1, gram: 1, liter: 1, litre: 1 };
+  function unitWord(tok, q) {
+    const base = tok.replace(/s$/, "");
+    if (!WORDY[base.toLowerCase()]) return tok;
+    return q > 1 ? base + "s" : base;
+  }
+  function parseLine(text) {
+    const m = String(text).match(QRE);
+    if (!m) return null;
+    const qty = num(m[1]), qty2 = m[2] ? num(m[2]) : null;
+    if (!qty) return null;
+    let rest = text.slice(m[0].length), unit = "", tok = "";
+    const u = rest.match(/^\s*([A-Za-z]+\.?)(?=[\s,)]|$)/);
+    if (u && UNIT_OF[u[1]]) { tok = u[1]; unit = UNIT_OF[tok]; rest = rest.slice(u[0].length); }
+    return { qty, qty2, unit, tok, name: rest.trim().replace(/^of\s+/i, "") };
+  }
+  function fmtQ(n) {
+    if (n >= 20) return String(Math.round(n));
+    const F = [[0, ""], [1 / 8, "⅛"], [1 / 4, "¼"], [1 / 3, "⅓"], [3 / 8, "⅜"], [1 / 2, "½"], [5 / 8, "⅝"], [2 / 3, "⅔"], [3 / 4, "¾"], [7 / 8, "⅞"], [1, ""]];
+    let whole = Math.floor(n + 1e-9);
+    const frac = n - whole;
+    let best = F[0];
+    for (const f of F) if (Math.abs(f[0] - frac) < Math.abs(best[0] - frac)) best = f;
+    if (best[0] === 1) whole += 1;
+    const out = (whole ? String(whole) : "") + (whole && best[1] ? " " : "") + best[1];
+    return out || (n > 0 ? "⅛" : "0");
+  }
+  function fmtM(n) {
+    if (n < 5) return String(Math.round(n * 10) / 10);
+    if (n < 100) return String(Math.round(n));
+    return String(Math.round(n / 5) * 5);
+  }
+  const ML = { cup: 236.6, tbsp: 14.79, tsp: 4.93, pint: 473.2, quart: 946.4, ml: 1, l: 1000 };
+  const GRAMS = { oz: 28.35, lb: 453.6, stick: 113, g: 1, kg: 1000 };
+  // Grams in one cup, for ingredients usually weighed in metric recipes.
+  const DENSITY = [[/peanut butter/i, 258], [/powdered|confectioner|icing/i, 120], [/brown sugar/i, 213], [/sugar/i, 200], [/flour/i, 125],
+    [/butter|oleo|margarine/i, 227], [/shortening|crisco|lard/i, 205], [/oats|oatmeal/i, 90], [/cocoa/i, 85], [/chocolate chips|chips/i, 170],
+    [/rice/i, 185], [/honey|syrup|molasses/i, 340], [/coconut/i, 85], [/nuts|pecans|walnuts|almonds/i, 115], [/cornstarch/i, 128],
+    [/raisins/i, 150], [/cheese/i, 113]];
+  function toMetric(unit, name) {
+    if (GRAMS[unit]) return { k: GRAMS[unit], tok: "g" };
+    if (!ML[unit] || unit === "ml" || unit === "l") return null;
+    const d = DENSITY.find(([re]) => re.test(name));
+    if (d && (unit === "cup" || /butter|oleo|margarine|shortening|peanut butter/i.test(name))) return { k: ML[unit] / 236.6 * d[1], tok: "g" };
+    return { k: ML[unit], tok: "ml" };
+  }
+  // Returns the line to show, plus its parts for the shopping list.
+  function convertLine(text, factor, metric) {
+    const p = parseLine(text);
+    if (!p) return { text, changed: false, qty: null, unit: "", tok: "", name: text };
+    let q = p.qty * factor, q2 = p.qty2 != null ? p.qty2 * factor : null;
+    if (metric && p.unit) {
+      const m = toMetric(p.unit, p.name);
+      if (m) {
+        q *= m.k; if (q2 != null) q2 *= m.k;
+        let tok = m.tok;
+        if (tok === "g" && q >= 1000) { q /= 1000; if (q2 != null) q2 /= 1000; tok = "kg"; }
+        if (tok === "ml" && q >= 1000) { q /= 1000; if (q2 != null) q2 /= 1000; tok = "l"; }
+        const qs = fmtM(q) + (q2 != null ? "–" + fmtM(q2) : "");
+        return { text: `${qs} ${tok} ${p.name}`.trim(), changed: true, qty: q2 != null ? null : q, unit: tok, tok, name: p.name, metric: true };
+      }
+    }
+    if (factor === 1) return { text, changed: false, qty: p.qty2 != null ? null : p.qty, unit: p.unit, tok: p.tok, name: p.name };
+    const qs = fmtQ(q) + (q2 != null ? "–" + fmtQ(q2) : "");
+    const tok = p.tok ? unitWord(p.tok, q) : "";
+    let name = p.name;
+    const one = name.match(/^([A-Za-z]+)(?=,|$)/);
+    if (!p.tok && p.qty <= 1 && q > 1 && one && !/s$/i.test(one[1])) name = one[1] + (/(o|ch|sh)$/i.test(one[1]) ? "es" : "s") + name.slice(one[1].length);
+    return { text: [qs, tok, name].filter(Boolean).join(" "), changed: true, qty: q2 != null ? null : q, unit: p.unit, tok, name };
+  }
+
+  // ─── shopping list (private to each person) ────────────────────────────────
+  const shopKey = (it) => (it.unit || "") + "|" + String(it.name).toLowerCase().replace(/,.*$/, "").replace(/\s+/g, " ").trim();
+  const shopText = (it) => [it.qty ? (it.metric ? fmtM(it.qty) : fmtQ(it.qty)) : "", it.tok ? (it.metric ? it.tok : unitWord(it.tok, it.qty || 1)) : "", it.name].filter(Boolean).join(" ");
+  function cleanShopping(v) {
+    return (Array.isArray(v) ? v : []).filter((x) => x && typeof x === "object" && str(x.name).trim()).slice(0, 300).map((x) => ({
+      id: str(x.id, 40) || randCode(10), qty: typeof x.qty === "number" && isFinite(x.qty) && x.qty > 0 ? x.qty : null, unit: str(x.unit, 10), tok: str(x.tok, 20),
+      name: str(x.name, 300), done: x.done === true, metric: x.metric === true, from: Array.isArray(x.from) ? x.from.slice(0, 10).map((f) => str(f, 120)) : [] }));
+  }
+  function addToShopping(parts, fromTitle) {
+    const list = prefs.shopping.map((x) => ({ ...x, from: [...x.from] }));
+    let added = 0;
+    for (const p of parts) {
+      const it = { id: randCode(10), qty: p.qty || null, unit: p.unit || "", tok: p.tok || "", name: str(p.name, 300), done: false, metric: !!p.metric, from: fromTitle ? [fromTitle] : [] };
+      if (!it.name.trim()) continue;
+      const same = list.find((x) => !x.done && shopKey(x) === shopKey(it) && !!x.metric === !!it.metric);
+      if (same) {
+        if (same.qty && it.qty) same.qty += it.qty;
+        if (fromTitle && !same.from.includes(fromTitle)) same.from.push(fromTitle);
+      } else list.push(it);
+      added++;
+    }
+    prefs.shopping = list.slice(0, 300);
+    savePrefs({ shopping: prefs.shopping });
+    drawShopBadge();
+    return added;
+  }
+  function setShopping(list) { prefs.shopping = list; savePrefs({ shopping: list }); drawShopBadge(); drawShopping(); }
+  function drawShopBadge() {
+    const n = prefs.shopping.filter((x) => !x.done).length;
+    const c = $("#shopCount"); c.hidden = !n; c.textContent = n > 99 ? "99+" : String(n);
+    $("#shopBtn").setAttribute("aria-label", n ? `Shopping list, ${n} item${n === 1 ? "" : "s"}` : "Shopping list");
+  }
+  const shopDlg = $("#shopDlg");
+  shopDlg.addEventListener("click", (e) => { if (e.target === shopDlg) shopDlg.close(); });
+  $("#shopBtn").addEventListener("click", () => { drawShopping(); shopDlg.showModal(); });
+  function drawShopping() {
+    const items = prefs.shopping;
+    const input = el("input", { id: "shopAdd", placeholder: "Add something, e.g. 1 dozen eggs", maxlength: "300", "aria-label": "Add an item" });
+    const ticked = items.filter((x) => x.done).length;
+    fill($("#shopSheet"),
+      el("button", { class: "close", type: "button", "aria-label": "Close", text: "×", onclick: () => shopDlg.close() }),
+      el("h2", { id: "shopTitle", text: "Shopping list" }),
+      el("p", { style: "margin:4px 0 14px;color:var(--muted)", text: items.length ? "Matching ingredients from different recipes are added together. Only you can see this list." : "Open a recipe and tap “Add the ingredients to my shopping list”, or add things here." }),
+      el("form", { class: "memform", style: "margin:0 0 12px", onsubmit: (e) => {
+        e.preventDefault(); const t = input.value.trim(); if (!t) return;
+        const p = convertLine(t, 1, false); addToShopping([p], ""); drawShopping(); $("#shopAdd").focus();
+      } }, input, el("button", { class: "btn", type: "submit", text: "Add" })),
+      items.length ? el("ul", { class: "shop" }, items.map((it, i) => el("li", {},
+        el("input", { type: "checkbox", id: "shop-" + i, checked: it.done, onchange: (e) => setShopping(prefs.shopping.map((x) => (x.id === it.id ? { ...x, done: e.target.checked } : x))) }),
+        el("label", { for: "shop-" + i }, el("span", { class: "it", text: shopText(it) }), it.from.length ? el("span", { class: "from", text: "For " + it.from.join(", ") }) : null),
+        el("button", { class: "x", type: "button", "aria-label": "Remove " + shopText(it), text: "×", onclick: () => setShopping(prefs.shopping.filter((x) => x.id !== it.id)) })))) : null,
+      items.length ? el("div", { class: "menu-list" },
+        ticked ? el("button", { class: "btn", type: "button", text: `Remove ticked items (${ticked})`, onclick: () => setShopping(prefs.shopping.filter((x) => !x.done)) }) : null,
+        el("button", { class: "btn", type: "button", text: "Copy or share the list", onclick: shareShopping }),
+        el("button", { class: "btn ghost danger", type: "button", text: "Clear the whole list", onclick: (e) => {
+          if (e.target.dataset.sure) { setShopping([]); toast("Shopping list cleared"); return; }
+          e.target.dataset.sure = "1"; e.target.textContent = "Tap again to clear everything";
+        } })) : null);
+  }
+  async function shareShopping() {
+    const text = "Shopping list\n" + prefs.shopping.filter((x) => !x.done).map((x) => "• " + shopText(x)).join("\n");
+    if (navigator.share) { try { await navigator.share({ title: "Shopping list", text }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+    copyText(text, "Shopping list copied");
+  }
+
+  // ─── favorites, views and sorting ──────────────────────────────────────────
+  const LAYOUTS = [["cards", "Cards"], ["list", "List"], ["tiles", "Photos"]];
+  const SORTS = [["az", "A to Z"], ["newest", "Newest first"], ["views", "Most viewed"], ["recent", "Recently viewed by you"],
+    ["rated", "Family favorites (rating)"], ["made", "Recently made"], ["notmade", "Not made in a while"]];
+  function cleanView(v) {
+    v = v && typeof v === "object" ? v : {};
+    return { layout: pick(v.layout, LAYOUTS, "cards"), sort: pick(v.sort, SORTS, "az"), favOnly: v.favOnly === true, metric: v.metric === true,
+      group: pick(v.group, GROUPS, "none"), tags: cleanTags(v.tags) };
+  }
+  const favKey = (boxId, rid) => boxId + "/" + rid;
+  const isFav = (rid) => !!box && prefs.favorites.includes(favKey(box.id, rid));
+  function toggleFav(r) {
+    const k = favKey(box.id, r.id), on = !prefs.favorites.includes(k);
+    prefs.favorites = on ? [k, ...prefs.favorites].slice(0, 500) : prefs.favorites.filter((x) => x !== k);
+    savePrefs({ favorites: prefs.favorites });
+    renderGrid(); if (openId) renderDetail();
+    toast(on ? "Added to your favorites" : "Removed from your favorites");
+  }
+  function setView(patch) {
+    prefs.view = cleanView({ ...prefs.view, ...patch });
+    savePrefs({ view: prefs.view });
+    drawViewControls(); renderGrid();
+  }
+  const sortSel = $("#sortSel");
+  sortSel.append(...SORTS.map(([v, l]) => el("option", { value: v, text: "Sort: " + l })));
+  sortSel.addEventListener("change", () => setView({ sort: sortSel.value }));
+  const favChip = el("button", { class: "chip fav", type: "button", "aria-pressed": "false", text: "♥ Favorites", onclick: () => setView({ favOnly: !prefs.view.favOnly }) });
+  $("#chips").prepend(favChip);
+  function drawViewControls() {
+    sortSel.value = prefs.view.sort;
+    favChip.setAttribute("aria-pressed", String(prefs.view.favOnly));
+    fill($("#layoutBtns"), LAYOUTS.map(([v, l]) => el("button", { class: "chip", type: "button", "aria-pressed": String(prefs.view.layout === v), text: l, onclick: () => setView({ layout: v }) })));
+    groupSel.value = prefs.view.group;
+    if (box) { drawTagPicker(); drawSavedViews(); }
+  }
+  function famInfo(rid) {
+    const rs = boxRatings.get(rid) || [];
+    const rated = rs.filter((x) => x.stars > 0);
+    const made = rs.flatMap((x) => x.made.map((d) => ({ d, by: x.by, byName: x.byName })));
+    const last = made.reduce((a, m) => (!a || m.d > a.d ? m : a), null);
+    return { rs, avg: rated.length ? rated.reduce((a, x) => a + x.stars, 0) / rated.length : 0, raters: rated.length, made: made.length, last,
+      mine: me ? rs.find((x) => x.by === me.uid) : null };
+  }
+  function sortRecipes(list) {
+    const a = [...list], t = (x) => tsToDate(x)?.getTime() || 0, title = (x, y) => x.title.localeCompare(y.title);
+    const s = prefs.view.sort;
+    const info = new Map(a.map((r) => [r.id, famInfo(r.id)]));
+    if (s === "newest") a.sort((x, y) => t(y.createdAt) - t(x.createdAt) || title(x, y));
+    else if (s === "views") a.sort((x, y) => (boxViews.get(y.id) || 0) - (boxViews.get(x.id) || 0) || title(x, y));
+    else if (s === "recent") { const pos = (r) => { const i = prefs.recent.indexOf(favKey(box.id, r.id)); return i < 0 ? 1e9 : i; }; a.sort((x, y) => pos(x) - pos(y) || title(x, y)); }
+    else if (s === "rated") a.sort((x, y) => info.get(y.id).avg - info.get(x.id).avg || info.get(y.id).raters - info.get(x.id).raters || title(x, y));
+    else if (s === "made") a.sort((x, y) => String(info.get(y.id).last?.d || "").localeCompare(String(info.get(x.id).last?.d || "")) || title(x, y));
+    else if (s === "notmade") a.sort((x, y) => String(info.get(x.id).last?.d || "").localeCompare(String(info.get(y.id).last?.d || "")) || title(x, y));
+    else a.sort(title);
+    return a;
+  }
+  function statLine(r) {
+    const f = famInfo(r.id), v = boxViews.get(r.id) || 0;
+    const bits = [isFav(r.id) ? "♥ Favorite" : "", f.avg ? `★ ${f.avg.toFixed(1)}` : "", f.made ? `made ${f.made}×` : "", v && prefs.view.sort === "views" ? `${v} view${v === 1 ? "" : "s"}` : ""].filter(Boolean);
+    return bits.length ? el("div", { class: "meta statline", text: bits.join(" · ") }) : null;
+  }
+
+  // My favorites from every box
+  const favDlg = $("#favDlg");
+  favDlg.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", () => favDlg.close()));
+  favDlg.addEventListener("click", (e) => { if (e.target === favDlg) favDlg.close(); });
+  const favCache = new Map();
+  $("#favBtn").addEventListener("click", () => { favDlg.showModal(); drawFavs(); });
+  async function drawFavs() {
+    const st = $("#favStatus"), ul = $("#favList");
+    const mine = prefs.favorites.filter((k) => boxes.some((b) => b.id === k.split("/")[0]));
+    if (!mine.length) { ul.replaceChildren(); st.textContent = "No favorites yet. Open a recipe and tap “Add to favorites”."; return; }
+    st.textContent = "Loading…";
+    const rows = await Promise.all(mine.map(async (k) => {
+      const [bid, rid] = k.split("/");
+      if (box && bid === box.id) { const r = recipes.find((x) => x.id === rid); return r ? { k, bid, rid, title: r.title, thumb: r.thumb } : null; }
+      if (!favCache.has(k)) favCache.set(k, fs.doc(`recipeBoxes/${bid}/recipes/${rid}`).get().then((s) => (s.exists ? { title: str(s.data().title, 200), thumb: safeImg(s.data().thumb) } : null)).catch(() => null));
+      const v = await favCache.get(k);
+      return v ? { k, bid, rid, ...v } : null;
+    }));
+    const list = rows.filter(Boolean).sort((a, b) => a.title.localeCompare(b.title));
+    st.textContent = `${list.length} favorite${list.length === 1 ? "" : "s"} from all your boxes.`;
+    fill(ul, list.map((x) => el("li", {}, el("button", { type: "button", onclick: () => { favDlg.close(); goToRecipe(x.bid, x.rid); } },
+      x.thumb ? el("img", { src: x.thumb, alt: "" }) : el("span", { class: "noimg", "aria-hidden": "true", text: initialOf(x.title) }),
+      el("span", {}, el("strong", { text: x.title || "Untitled recipe" }), el("span", { class: "where", text: boxLabel(boxes.find((b) => b.id === x.bid)) }))))));
+  }
+  function goToRecipe(bid, rid) {
+    location.hash = `#r-${bid}.${rid}`;
+    if (box && box.id === bid) fromHash(); else if (boxes.some((b) => b.id === bid)) openBox(bid, true);
+  }
+
+  // ─── views, ratings and "I made this" in the open box ──────────────────────
+  let boxViews = new Map(), boxRatings = new Map();
+  const viewedThisVisit = new Set();
+  function watchKitchen(ref) {
+    boxViews = new Map(); boxRatings = new Map();
+    unsub.push(ref.collection("stats").onSnapshot((snap) => {
+      boxViews = new Map(snap.docs.map((d) => [d.id, Math.max(0, +d.data().views || 0)]));
+      if (prefs.view.sort === "views") renderGridIfReady();
+    }, (e) => console.error(e)));
+    unsub.push(ref.collection("ratings").onSnapshot((snap) => {
+      const m = new Map();
+      for (const d of snap.docs) {
+        const v = d.data() || {};
+        const x = { recipeId: str(v.recipeId, 100), by: str(v.by, 200), byName: str(v.byName, 100), stars: Math.max(0, Math.min(5, Math.round(+v.stars || 0))),
+          note: str(v.note, 1000), made: Array.isArray(v.made) ? v.made.filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s)).slice(0, 200) : [] };
+        if (!m.has(x.recipeId)) m.set(x.recipeId, []);
+        m.get(x.recipeId).push(x);
+      }
+      boxRatings = m;
+      renderGridIfReady();
+      if (openId && !document.activeElement?.closest?.(".rate, .memform")) renderDetail();
+    }, (e) => console.error(e)));
+  }
+  function noteView(r) {
+    const k = favKey(box.id, r.id);
+    prefs.recent = [k, ...prefs.recent.filter((x) => x !== k)].slice(0, 30);
+    savePrefs({ recent: prefs.recent });
+    if (viewedThisVisit.has(k)) return;
+    viewedThisVisit.add(k);
+    boxRef().collection("stats").doc(r.id).set({ views: FV.increment(1), lastViewed: FV.serverTimestamp() }, { merge: true }).catch(() => {});
+  }
+  const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const fmtDay = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }); };
+  function saveRating(r, patch) {
+    const mine = famInfo(r.id).mine || { stars: 0, note: "", made: [] };
+    const data = { recipeId: r.id, by: me.uid, byName: myName(), stars: mine.stars, note: mine.note, made: mine.made, ...patch, updatedAt: FV.serverTimestamp() };
+    return boxRef().collection("ratings").doc(`${r.id}_${me.uid}`).set(data).catch((e) => { console.error(e); toast("Couldn't save that. Check your connection."); });
+  }
+  function ratingSection(r) {
+    const f = famInfo(r.id), mine = f.mine || { stars: 0, note: "", made: [] };
+    const personal = isPersonal(box);
+    const madeToday = mine.made.includes(today());
+    const others = f.rs.filter((x) => x.by !== me.uid && (x.stars || x.note));
+    const note = el("textarea", { id: "tweakText", rows: "2", maxlength: "1000", placeholder: "Less sugar, bake 5 minutes longer…", text: mine.note });
+    note.value = mine.note;
+    const summary = personal
+      ? (mine.made.length ? `You've made this ${mine.made.length} time${mine.made.length === 1 ? "" : "s"}, last on ${fmtDay(mine.made.reduce((a, b) => (b > a ? b : a)))}.` : "You haven't marked this as made yet.")
+      : [f.raters ? `Family rating ★ ${f.avg.toFixed(1)} from ${f.raters} ${f.raters === 1 ? "person" : "people"}.` : "No ratings yet.",
+         f.made ? `Made ${f.made} time${f.made === 1 ? "" : "s"} in the family, last by ${f.last.by === me.uid ? "you" : f.last.byName || "someone"} on ${fmtDay(f.last.d)}.` : ""].filter(Boolean).join(" ");
+    return [
+      el("div", { class: "section-label", text: personal ? "Made it & your rating" : "Made it & ratings" }),
+      el("div", { class: "rate" },
+        el("p", { style: "margin:0", text: summary }),
+        el("div", {}, madeToday
+          ? el("button", { class: "btn on", type: "button", text: "Made today ✓ · tap to undo", onclick: () => saveRating(r, { made: mine.made.filter((d) => d !== today()) }) })
+          : el("button", { class: "btn", type: "button", text: "I made this today", onclick: () => { saveRating(r, { made: [...mine.made, today()].slice(-200) }); toast("Marked as made today"); } })),
+        el("div", { class: "stars", role: "group", "aria-label": "Your rating" },
+          el("span", { style: "margin-right:6px;font-weight:700;font-size:.9rem", text: "Your rating:" }),
+          [1, 2, 3, 4, 5].map((n) => el("button", { type: "button", "data-on": String(n <= mine.stars), "aria-pressed": String(n === mine.stars),
+            "aria-label": `${n} star${n === 1 ? "" : "s"} out of 5`, text: n <= mine.stars ? "★" : "☆",
+            onclick: () => saveRating(r, { stars: n === mine.stars ? 0 : n }) }))),
+        el("div", { class: "field" }, el("label", { for: "tweakText", text: personal ? "Your notes and tweaks" : "Your tweaks (the family sees these)" }), note),
+        el("div", {}, el("button", { class: "btn", type: "button", text: "Save tweaks", onclick: async () => { await saveRating(r, { note: note.value.trim().slice(0, 1000) }); toast("Tweaks saved"); } })),
+        others.length ? el("ul", { class: "tweaks" }, others.map((x) => el("li", {},
+          el("div", { text: (x.stars ? "★".repeat(x.stars) + "☆".repeat(5 - x.stars) + (x.note ? " · " : "") : "") + x.note }),
+          el("div", { class: "who", text: "— " + nameOf(x.by, x.byName) })))) : null),
+    ];
+  }
+
+  // ─── tags filter, grouping and saved personal views ───────────────────────
+  setTimeout(drawViewControls, 0);
+  const GROUPS = [["none", "No grouping"], ["category", "Category"], ["tag", "Tag"], ["source", "Where it came from"], ["addedBy", "Who added it"]];
+  const groupSel = $("#groupSel");
+  groupSel.append(...GROUPS.map(([v, l]) => el("option", { value: v, text: v === "none" ? "Group: none" : "Group by " + l.toLowerCase() })));
+  groupSel.addEventListener("change", () => setView({ group: groupSel.value }));
+  const tagPick = el("details", { class: "tagpick" }, el("summary", { class: "chip", text: "Tags" }), el("div", { class: "tagbox", id: "tagBox", role: "group", "aria-label": "Show recipes with all of these tags" }));
+  favChip.after(tagPick);
+  function drawTagPicker() {
+    const counts = new Map();
+    for (const r of recipes) for (const t of r.tags) counts.set(t, (counts.get(t) || 0) + 1);
+    for (const t of prefs.view.tags) if (!counts.has(t)) counts.set(t, 0);
+    const sel = prefs.view.tags;
+    tagPick.querySelector("summary").textContent = sel.length ? `Tags: ${sel.join(", ")}` : "Tags";
+    tagPick.querySelector("summary").setAttribute("aria-pressed", String(sel.length > 0));
+    const list = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    fill($("#tagBox"),
+      list.length ? null : el("p", { class: "status", text: "No tags in this box yet." }),
+      list.map(([t, n], i) => el("label", { class: "tagopt" },
+        el("input", { type: "checkbox", checked: sel.includes(t), onchange: (e) => setView({ tags: e.target.checked ? [...sel, t] : sel.filter((x) => x !== t) }) }),
+        el("span", { text: `#${t} (${n})` }))),
+      sel.length ? el("button", { class: "linkbtn", type: "button", style: "margin-top:6px", text: "Clear tags", onclick: () => setView({ tags: [] }) }) : null);
+  }
+  function groupsOf(r) {
+    const g = prefs.view.group;
+    if (g === "category") return [r.category || "No category"];
+    if (g === "tag") return r.tags.length ? r.tags.map((t) => "#" + t) : ["No tags"];
+    if (g === "source") return [SRC[r.source] || "Somewhere else"];
+    if (g === "addedBy") return [r.addedBy === me.uid ? "Added by you" : "Added by " + nameOf(r.addedBy, r.addedByName)];
+    return [""];
+  }
+  function grouped(list) {
+    const m = new Map();
+    for (const r of list) for (const g of groupsOf(r)) { if (!m.has(g)) m.set(g, []); m.get(g).push(r); }
+    const last = (k) => /^No /.test(k) ? 1 : 0;
+    return [...m].sort((a, b) => last(a[0]) - last(b[0]) || a[0].localeCompare(b[0]));
+  }
+
+  // A saved view remembers the search, filters, tags, sort, grouping and layout. They're private to you.
+  const currentLook = () => ({ q: $("#q").value.trim(), src: filterSrc, cat: catSel.value, tags: [...prefs.view.tags], sort: prefs.view.sort,
+    layout: prefs.view.layout, group: prefs.view.group, favOnly: prefs.view.favOnly });
+  const LOOK_KEYS = ["q", "src", "cat", "tags", "sort", "layout", "group", "favOnly"];
+  const sameLook = (a, b) => LOOK_KEYS.every((k) => JSON.stringify(a[k]) === JSON.stringify(b[k]));
+  function cleanSaved(v) {
+    return (Array.isArray(v) ? v : []).filter((x) => x && typeof x === "object" && str(x.name).trim()).slice(0, 20).map((x) => ({
+      id: str(x.id, 40) || randCode(10), name: str(x.name, 40), q: str(x.q, 200), src: SRC[x.src] || x.src === "all" ? x.src : "all",
+      cat: CATS.includes(x.cat) ? x.cat : "", tags: cleanTags(x.tags), sort: pick(x.sort, SORTS, "az"), layout: pick(x.layout, LAYOUTS, "cards"),
+      group: pick(x.group, GROUPS, "none"), favOnly: x.favOnly === true }));
+  }
+  function applySaved(v) {
+    $("#q").value = v.q;
+    filterSrc = v.src;
+    $("#chips").querySelectorAll(".chip[data-k]").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.k === filterSrc)));
+    catSel.value = v.cat;
+    prefs.view = cleanView({ ...prefs.view, tags: v.tags, sort: v.sort, layout: v.layout, group: v.group, favOnly: v.favOnly });
+    savePrefs({ view: prefs.view });
+    drawViewControls(); renderGrid();
+    toast(`Showing “${v.name}”`);
+  }
+  let namingView = false;
+  function drawSavedViews() {
+    const row = $("#savedViews");
+    const look = currentLook();
+    const input = el("input", { id: "viewName", maxlength: "40", placeholder: "Name it, e.g. Christmas baking", "aria-label": "Name for this view" });
+    fill(row,
+      el("span", { class: "lbl", text: "My views:" }),
+      prefs.savedViews.map((v) => el("span", { class: "sv" },
+        el("button", { class: "chip", type: "button", "aria-pressed": String(sameLook(v, look)), text: v.name, onclick: () => applySaved(v) }),
+        el("button", { class: "svx", type: "button", "aria-label": `Delete the view “${v.name}”`, text: "×", onclick: () => {
+          prefs.savedViews = prefs.savedViews.filter((x) => x.id !== v.id); savePrefs({ savedViews: prefs.savedViews }); drawSavedViews(); toast(`Deleted “${v.name}”`);
+        } }))),
+      namingView
+        ? el("form", { class: "svform", onsubmit: (e) => {
+            e.preventDefault(); const name = input.value.trim(); if (!name) return;
+            prefs.savedViews = [...prefs.savedViews.filter((x) => x.name.toLowerCase() !== name.toLowerCase()), { id: randCode(10), name, ...currentLook() }].slice(-20);
+            savePrefs({ savedViews: prefs.savedViews }); namingView = false; drawSavedViews(); toast(`Saved “${name}”`);
+          } }, input, el("button", { class: "btn", type: "submit", text: "Save" }), el("button", { class: "btn ghost", type: "button", text: "Cancel", onclick: () => { namingView = false; drawSavedViews(); } }))
+        : el("button", { class: "chip addbox", type: "button", text: "+ Save this view", onclick: () => { namingView = true; drawSavedViews(); $("#viewName").focus(); } }));
+  }
+
+
+  // ─── cook mode: one step at a time, read aloud, hands-free ────────────────
+  const cookDlg = $("#cookDlg");
+  const synth = window.speechSynthesis || null;
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  let cook = null;          // { r, steps: [{label, text, kind}], i }
+  let recog = null, recogOn = false, cookWake = null;
+  const timers = [];        // { id, label, end, left, done, handle }
+
+  function startCook(r) {
+    const lines = r.ingredients.map((g) => convertLine(g, scale, prefs.view.metric).text);
+    const steps = [];
+    if (lines.length) steps.push({ kind: "ings", label: "Gather the ingredients", text: lines.join(". "), lines });
+    r.steps.forEach((t, i) => steps.push({ kind: "step", label: `Step ${i + 1} of ${r.steps.length}`, text: t }));
+    if (r.notes) steps.push({ kind: "note", label: "From the card", text: r.notes });
+    steps.push({ kind: "done", label: "All done", text: "That's the last step. Enjoy!" });
+    cook = { r, steps, i: 0, ticked: new Set() };
+    closeRecipe();
+    cookDlg.showModal();
+    holdScreen();
+    drawCook(true);
+    if (prefs.cook.listen) startHearing();
+  }
+  function endCook() {
+    stopHearing(); if (synth) synth.cancel();
+    if (cookWake) { try { cookWake.release(); } catch {} cookWake = null; }
+    const r = cook && cook.r; cook = null;
+    if (cookDlg.open) cookDlg.close();
+    if (r && recipes.some((x) => x.id === r.id)) openRecipe(r.id);
+  }
+  cookDlg.addEventListener("cancel", (e) => { e.preventDefault(); endCook(); });
+  async function holdScreen() { try { if ("wakeLock" in navigator) cookWake = await navigator.wakeLock.request("screen"); } catch {} }
+  document.addEventListener("visibilitychange", () => { if (cook && document.visibilityState === "visible" && !cookWake) holdScreen(); });
+
+  function go(delta) {
+    if (!cook) return;
+    const n = Math.max(0, Math.min(cook.steps.length - 1, cook.i + delta));
+    if (n === cook.i) { if (delta > 0) say("That's the last step."); return; }
+    cook.i = n; drawCook(true);
+  }
+  function speakable(st) {
+    if (st.kind === "ings") return "Gather the ingredients. " + st.lines.join(". ").replace(/\bc\./gi, "cup").replace(/\bT\./g, "tablespoon").replace(/\bt\./g, "teaspoon").replace(/\btsp\./gi, "teaspoon").replace(/\btbsp\./gi, "tablespoon").replace(/\boz\./gi, "ounce").replace(/\blbs?\./gi, "pound");
+    return (st.kind === "step" ? st.label.replace(/ of \d+$/, "") + ". " : "") + st.text;
+  }
+  function pickVoice() {
+    if (!synth) return null;
+    const vs = synth.getVoices();
+    return vs.find((v) => v.voiceURI === prefs.cook.voice) || vs.find((v) => v.default && /^en/i.test(v.lang)) || vs.find((v) => /^en/i.test(v.lang)) || null;
+  }
+  function say(text) {
+    if (!synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; }
+    u.rate = prefs.cook.rate;
+    synth.speak(u);
+  }
+  function findTimes(text) {
+    const out = [], re = /(\d+(?:\s*(?:-|–|to)\s*\d+)?)\s*(hours?|hrs?\.?|minutes?|mins?\.?|seconds?|secs?\.?)\b/gi;
+    let m;
+    while ((m = re.exec(text))) {
+      const nums = m[1].split(/\s*(?:-|–|to)\s*/).map(Number), u = m[2].toLowerCase();
+      const per = /^h/.test(u) ? 3600 : /^s/.test(u) ? 1 : 60;
+      const secs = nums[0] * per, unitName = per === 3600 ? "hr" : per === 1 ? "sec" : "min";
+      if (secs > 0 && secs <= 24 * 3600) out.push({ secs, label: `${nums[0]} ${unitName}`, range: nums.length > 1 ? `${nums[0]}–${nums[1]} ${unitName}` : "" });
+    }
+    return out.slice(0, 4);
+  }
+  const mmss = (s) => { s = Math.max(0, Math.ceil(s)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0"); };
+  function startTimer(secs, label) {
+    const t = { id: randCode(6), label, end: Date.now() + secs * 1000, done: false };
+    timers.push(t);
+    if (prefs.cook.read) say(`Timer started for ${label.replace("min", "minutes").replace("hr", "hours").replace("sec", "seconds")}.`);
+    drawTimers();
+  }
+  setInterval(() => {
+    let changed = false;
+    for (const t of timers) if (!t.done && Date.now() >= t.end) { t.done = true; changed = true; timerDone(t); }
+    if (timers.length) drawTimers(changed);
+  }, 1000);
+  function timerDone(t) {
+    const msg = `Timer done: ${t.label}${cook ? ` for ${cook.r.title}` : ""}`;
+    try { const ac = new (window.AudioContext || window.webkitAudioContext)(); [0, 0.35, 0.7].forEach((d) => { const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = 880; o.connect(g); g.connect(ac.destination); g.gain.setValueAtTime(0.25, ac.currentTime + d); g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + d + 0.3); o.start(ac.currentTime + d); o.stop(ac.currentTime + d + 0.3); }); } catch {}
+    try { navigator.vibrate && navigator.vibrate([300, 150, 300]); } catch {}
+    say(msg); toast(msg);
+    if (document.visibilityState !== "visible") deviceAlert(msg, { id: "timer-" + t.id, recipeId: "", recipeIds: [], count: 0, boxId: box ? box.id : "" });
+  }
+  function drawTimers() {
+    const host = $("#cookTimers");
+    if (!host) return;
+    fill(host, timers.map((t) => el("span", { class: "timer" + (t.done ? " done" : ""), role: t.done ? "alert" : null },
+      el("span", { text: t.done ? `${t.label} done!` : `${t.label}: ${mmss((t.end - Date.now()) / 1000)}` }),
+      el("button", { type: "button", "aria-label": (t.done ? "Dismiss timer " : "Cancel timer ") + t.label, text: t.done ? "OK" : "Cancel",
+        onclick: () => { timers.splice(timers.indexOf(t), 1); drawTimers(); } }))));
+  }
+  function drawCook(announce) {
+    const { r, steps, i } = cook, st = steps[i];
+    const times = st.kind === "step" ? findTimes(st.text) : [];
+    const voices = synth ? synth.getVoices().filter((v) => /^en/i.test(v.lang) || v.lang === document.documentElement.lang) : [];
+    const mine = famInfo(r.id).mine;
+    fill($("#cookSheet"),
+      el("div", { class: "cookhead" },
+        el("h2", { id: "cookTitle", text: r.title || "Recipe" }),
+        el("span", { class: "prog", text: `${i + 1} of ${steps.length}` }),
+        el("button", { class: "btn", type: "button", text: "Exit cook mode", onclick: endCook })),
+      el("div", { class: "cookbar", "aria-hidden": "true" }, el("span", { style: `width:${((i + 1) / steps.length) * 100}%` })),
+      el("div", { class: "cookbody", "aria-live": "polite", id: "cookBody" },
+        el("div", { class: "label", text: st.label }),
+        st.kind === "ings"
+          ? el("ul", { class: "ings" }, st.lines.map((l, k) => el("li", {}, el("label", {},
+              el("input", { type: "checkbox", checked: cook.ticked.has(k), onchange: (e) => { e.target.checked ? cook.ticked.add(k) : cook.ticked.delete(k); } }), el("span", { text: l })))))
+          : el("p", { class: "cookstep" + (st.kind === "note" ? " handnote" : ""), text: st.text }),
+        times.length ? el("div", { class: "cooktools", style: "margin-top:16px" }, times.map((t) => el("button", { class: "btn", type: "button", text: `⏱ Start a ${t.label} timer` + (t.range ? ` (card says ${t.range})` : ""), onclick: () => startTimer(t.secs, t.label) }))) : null,
+        st.kind === "done" ? el("div", { class: "cooktools", style: "margin-top:16px" },
+          mine && mine.made.includes(today()) ? el("span", { text: "Marked as made today ✓" }) :
+            el("button", { class: "btn primary", type: "button", text: "I made this today", onclick: async () => { await saveRating(r, { made: [...((mine && mine.made) || []), today()].slice(-200) }); toast("Marked as made today"); drawCook(false); } })) : null),
+      el("div", { class: "timers", id: "cookTimers" }),
+      el("div", { class: "cooktools" },
+        synth ? el("button", { class: "btn" + (prefs.cook.read ? " on" : ""), type: "button", "aria-pressed": String(prefs.cook.read), text: prefs.cook.read ? "🔊 Reading aloud" : "🔇 Read aloud: off",
+          onclick: () => { prefs.cook = { ...prefs.cook, read: !prefs.cook.read }; savePrefs({ cook: prefs.cook }); if (!prefs.cook.read) synth.cancel(); else say(speakable(st)); drawCook(false); } }) : null,
+        synth ? el("button", { class: "btn", type: "button", text: "Repeat", onclick: () => say(speakable(st)) }) : null,
+        Recognition ? el("button", { class: "btn" + (recogOn ? " on" : ""), type: "button", "aria-pressed": String(recogOn), text: recogOn ? "🎙 Listening" : "🎙 Hands-free",
+          onclick: () => { if (recogOn) stopHearing(true); else startHearing(true); drawCook(false); } }) : null),
+      Recognition && recogOn ? el("p", { class: "heard", id: "heard", text: "Say “next”, “back”, “repeat”, “ingredients”, “start timer” or “stop”." }) : null,
+      synth ? el("details", { class: "voiceprefs" }, el("summary", { text: "Voice settings" }),
+        el("div", { class: "row" },
+          voices.length ? el("select", { "aria-label": "Voice", onchange: (e) => { prefs.cook = { ...prefs.cook, voice: e.target.value }; savePrefs({ cook: prefs.cook }); say("This is how I sound."); } },
+            el("option", { value: "", text: "Device's default voice" }), voices.map((v) => el("option", { value: v.voiceURI, text: `${v.name} (${v.lang})`, selected: v.voiceURI === prefs.cook.voice }))) : null,
+          el("select", { "aria-label": "Speaking speed", onchange: (e) => { prefs.cook = { ...prefs.cook, rate: +e.target.value }; savePrefs({ cook: prefs.cook }); say("This is my speed."); } },
+            [[0.8, "Slower"], [1, "Normal speed"], [1.2, "Faster"]].map(([v, l]) => el("option", { value: v, text: l, selected: prefs.cook.rate === v }))))) : null,
+      el("div", { class: "cooknav" },
+        el("button", { class: "btn", type: "button", text: "← Back", disabled: i === 0, onclick: () => go(-1) }),
+        i < steps.length - 1 ? el("button", { class: "btn primary", type: "button", text: "Next →", onclick: () => go(1) })
+          : el("button", { class: "btn primary", type: "button", text: "Finish", onclick: endCook })));
+    drawTimers();
+    if (announce && prefs.cook.read) say(speakable(st));
+  }
+  cookDlg.addEventListener("keydown", (e) => {
+    if (!cook || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+    if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); go(1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(-1); }
+  });
+  if (synth && "onvoiceschanged" in synth) synth.addEventListener("voiceschanged", () => { if (cook) drawCook(false); });
+
+  // Hands-free: listen for a few words while cook mode is open.
+  function startHearing(remember) {
+    if (!Recognition || recogOn) return;
+    if (remember) { prefs.cook = { ...prefs.cook, listen: true }; savePrefs({ cook: prefs.cook }); }
+    recogOn = true;
+    const begin = () => {
+      if (!recogOn || !cook) return;
+      recog = new Recognition();
+      recog.lang = document.documentElement.lang || "en-US";
+      recog.continuous = true; recog.interimResults = false;
+      recog.onresult = (ev) => {
+        const res = ev.results[ev.results.length - 1];
+        if (!res.isFinal || (synth && synth.speaking)) return;
+        command(res[0].transcript.toLowerCase().trim());
+      };
+      recog.onerror = (ev) => {
+        if (ev.error === "not-allowed" || ev.error === "service-not-allowed") { recogOn = false; toast("The microphone isn't allowed, so hands-free is off. Allow it in your browser's settings to use it."); if (cook) drawCook(false); }
+      };
+      recog.onend = () => { if (recogOn && cook) setTimeout(begin, 300); };   // browsers stop after a pause; keep going
+      try { recog.start(); } catch {}
+    };
+    begin();
+  }
+  function stopHearing(remember) {
+    if (remember) { prefs.cook = { ...prefs.cook, listen: false }; savePrefs({ cook: prefs.cook }); }
+    recogOn = false;
+    if (recog) { try { recog.onend = null; recog.stop(); } catch {} recog = null; }
+  }
+  function command(t) {
+    const heard = $("#heard"); if (heard) heard.textContent = `Heard: “${t}”`;
+    const st = cook.steps[cook.i];
+    if (/\b(next|continue|go on|forward|done with that)\b/.test(t)) go(1);
+    else if (/\b(back|previous|go back|last step)\b/.test(t)) go(-1);
+    else if (/\b(repeat|again|what was that|read it)\b/.test(t)) say(speakable(st));
+    else if (/\bingredients?\b/.test(t)) { cook.i = 0; drawCook(true); }
+    else if (/\b(start|set)( the| a)? timer\b/.test(t)) { const x = st.kind === "step" && findTimes(st.text)[0]; if (x) startTimer(x.secs, x.label); else say("I don't see a time in this step."); }
+    else if (/\b(stop|quiet|pause|be quiet)\b/.test(t)) { if (synth) synth.cancel(); }
+    else if (/\b(exit|close|finish|i'm done|all done)\b/.test(t)) endCook();
   }
 
   // ─── updates ───────────────────────────────────────────────────────────────

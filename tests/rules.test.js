@@ -200,9 +200,28 @@ describe("who's here now", () => {
   });
 });
 
+describe("ratings and view counts", () => {
+  test("members rate and log 'I made this' as themselves only", async () => {
+    await assertSucceeds(setDoc(doc(db(BOB), "recipeBoxes/fam/ratings/r_alice_bob"), { recipeId: "r_alice", by: BOB, byName: "Bob", stars: 5, note: "Less sugar", made: ["2026-11-01"], updatedAt: serverTimestamp() }));
+    await assertFails(setDoc(doc(db(BOB), "recipeBoxes/fam/ratings/r_alice_alice"), { recipeId: "r_alice", by: ALICE, stars: 1 }));
+    await assertFails(setDoc(doc(db(BOB), "recipeBoxes/fam/ratings/r_alice_alice"), { recipeId: "r_alice", by: BOB, stars: 1 }));
+    await assertFails(setDoc(doc(db(BOB), "recipeBoxes/fam/ratings/r_alice_bob"), { recipeId: "r_alice", by: BOB, stars: 9 }));
+    await assertFails(setDoc(doc(db(CAROL), "recipeBoxes/fam/ratings/r_alice_carol"), { recipeId: "r_alice", by: CAROL, stars: 5 }));
+    await assertSucceeds(getDocs(collection(db(ALICE), "recipeBoxes/fam/ratings")));
+    await assertFails(getDocs(collection(db(CAROL), "recipeBoxes/fam/ratings")));
+  });
+  test("view counts only go up by one", async () => {
+    const ref = (u) => doc(db(u), "recipeBoxes/fam/stats/r_alice");
+    await assertSucceeds(setDoc(ref(BOB), { views: 1, lastViewed: serverTimestamp() }));
+    await assertSucceeds(setDoc(ref(ALICE), { views: 2, lastViewed: serverTimestamp() }));
+    await assertFails(setDoc(ref(BOB), { views: 500, lastViewed: serverTimestamp() }));
+    await assertFails(setDoc(ref(CAROL), { views: 3, lastViewed: serverTimestamp() }));
+  });
+});
+
 describe("personal settings", () => {
   test("only you can read or change your settings", async () => {
-    await assertSucceeds(setDoc(doc(db(BOB), "recipeUsers/bob"), { theme: { mode: "dark" } }));
+    await assertSucceeds(setDoc(doc(db(BOB), "recipeUsers/bob"), { theme: { mode: "dark" }, favorites: ["fam/r_alice"], shopping: [{ id: "a", name: "flour", done: false }] }));
     await assertSucceeds(getDoc(doc(db(BOB), "recipeUsers/bob")));
     await assertFails(getDoc(doc(db(ALICE), "recipeUsers/bob")));
     await assertFails(setDoc(doc(db(ALICE), "recipeUsers/bob"), { theme: {} }));
